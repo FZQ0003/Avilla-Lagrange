@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     from ...account import LagrangeAccount
 
 
-class OneBot11MessageDeserializePerform((m := ApplicationCollector())._):
+class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
     m.namespace = 'avilla.protocol/lagrange::message'
     m.identify = 'deserialize'
 
