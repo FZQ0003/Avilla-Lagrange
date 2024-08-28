@@ -1,0 +1,26 @@
+# Project files
+.idea/
+.vscode/
+
+# Venv
+.venv/
+venv/
+__pypackages__/
+
+# PDM
+.pdm.toml
+.pdm-python
+.pdm-build/
+
+# Archive
+archive/
+
+# Cache
+__pycache__/
+
+# Distribution
+dist/
+
+# Temp
+device.json
+sig.bin
