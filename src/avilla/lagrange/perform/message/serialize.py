@@ -74,25 +74,25 @@ class LagrangeMessageSerializePerform((m := AccountCollector['LagrangeProtocol',
     # TODO: resource and more...
 
     @m.entity(LagrangeCapability.serialize_element, element=Picture)
-    async def picture(self, element: Picture) -> LgrImage:
+    async def picture(self, element: Picture) -> LgrImage | None:
         # client: Client = self.connection.client
         if isinstance(element.resource, LagrangeResource):
             return element.resource.res
-        if self.context:
-            ...
+        # if self.context:
+        #     ...
 
     @m.entity(LagrangeCapability.serialize_element, element=Audio)
-    async def audio(self, element: Audio) -> LgrAudio:
+    async def audio(self, element: Audio) -> LgrAudio | None:
         if isinstance(element.resource, LagrangeResource):
             return element.resource.res
 
     @m.entity(LagrangeCapability.serialize_element, element=Video)
-    async def video(self, element: Video) -> LgrVideo:
+    async def video(self, element: Video) -> LgrVideo | None:
         if isinstance(element.resource, LagrangeResource):
             return element.resource.res
 
     @m.entity(LagrangeCapability.serialize_element, element=FlashImage)
-    async def flash_image(self, element: FlashImage) -> LgrImage:
+    async def flash_image(self, element: FlashImage) -> LgrImage | None:
         return await self.picture(element)
 
     @m.entity(LagrangeCapability.serialize_element, element=Notice)

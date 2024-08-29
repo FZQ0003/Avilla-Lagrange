@@ -59,7 +59,25 @@ AVAILABLE_EVENTS = (
     FriendMessage,
     # FriendNudge,
 )
-Event = Union[AVAILABLE_EVENTS]
+Event = Union[
+    ClientOnline,
+    ClientOffline,
+    ServerKick,
+    GroupMessage,
+    GroupRecall,
+    # GroupNudge,
+    # GroupSign,
+    # GroupMuteMember,
+    # GroupMemberJoinRequest,
+    # GroupMemberJoined,
+    # GroupMemberQuit,
+    # GroupMemberGotSpecialTitle,
+    # GroupNameChanged,
+    # GroupReaction,
+    # GroupAlbumUpdate,
+    FriendMessage,
+    # FriendNudge,
+]
 
 AVAILABLE_MSG_ELEMENTS = (
     Text,
@@ -77,4 +95,19 @@ AVAILABLE_MSG_ELEMENTS = (
     Poke,
     MarketFace,
 )
-Element = Union[AVAILABLE_MSG_ELEMENTS]
+Element = Union[
+    Text,
+    Quote,
+    Json,
+    # Service,
+    AtAll,
+    At,
+    Image,
+    Video,
+    Audio,
+    Raw,
+    Emoji,
+    # Reaction,
+    Poke,
+    MarketFace,
+]

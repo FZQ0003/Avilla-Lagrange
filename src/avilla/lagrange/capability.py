@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from avilla.core.event import AvillaEvent
 from avilla.core.ryanvk.collector.application import ApplicationCollector
+from avilla.standard.core.application import AvillaLifecycleEvent
 from graia.amnesia.message import Element, MessageChain
 from graia.ryanvk import Fn, TypeOverload
 
@@ -11,11 +12,11 @@ from .types import Event as LgrEvent
 
 class LagrangeCapability((m := ApplicationCollector())._):
     @Fn.complex({TypeOverload(): ['raw_event']})
-    async def event_callback(self, raw_event: LgrEvent) -> AvillaEvent | None:
+    async def event_callback(self, raw_event: ...) -> AvillaEvent | AvillaLifecycleEvent | None:
         ...
 
     @Fn.complex({TypeOverload(): ['raw_element']})
-    async def deserialize_element(self, raw_element: LgrElement) -> Element | None:  # type: ignore
+    async def deserialize_element(self, raw_element: ...) -> Element | None:  # type: ignore
         ...
 
     @Fn.complex({TypeOverload(): ['element']})

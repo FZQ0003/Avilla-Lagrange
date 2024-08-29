@@ -30,4 +30,4 @@ def _config(level: str | int):
 log.set_level = _config
 log.set_level(logging.INFO)
 
-_Logger.get_logger = lambda self: logger.patch(lambda r: r.update(name=self.context))
+_Logger.get_logger = lambda self: logger.patch(lambda r: r.update(name=self.context))  # pyright: ignore

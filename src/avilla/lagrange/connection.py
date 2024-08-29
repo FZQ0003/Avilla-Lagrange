@@ -6,8 +6,11 @@ from typing import TYPE_CHECKING
 from avilla.core import Selector
 from avilla.core.account import AccountInfo
 from avilla.core.ryanvk.staff import Staff
-from lagrange import Client, app_list, sign_provider
+from lagrange import Client
+from lagrange.info.app import app_list
+from lagrange.utils.sign import sign_provider
 from launart import Service, Launart, any_completed
+from launart.status import Phase
 from loguru import logger
 
 from .account import LagrangeAccount
@@ -20,8 +23,13 @@ if TYPE_CHECKING:
 
 
 class LagrangeClientService(Service):
-    required = set()
-    stages = {'preparing', 'blocking', 'cleanup'}
+    @property
+    def required(self) -> set[str]:
+        return set()
+
+    @property
+    def stages(self) -> set[Phase]:
+        return {'preparing', 'blocking', 'cleanup'}
 
     account: LagrangeAccount
     client: Client
@@ -103,6 +111,7 @@ class LagrangeClientService(Service):
     async def launch(self, manager: Launart):
         async with self.stage('preparing'):
             self.init_account()
+
             # client is unused for there is a self.client
             async def handler(client: Client, event: Event):  # noqa
                 # cache uid (always update)
@@ -122,6 +131,7 @@ class LagrangeClientService(Service):
                     await LagrangeCapability(self.staff).handle_event(event)
                     return
                 logger.warning(f'Client {client.uin} received unsupported event: {event.__class__.__name__}')
+
             # lagrange.subscribe
             for event in AVAILABLE_EVENTS:
                 self.client.events.subscribe(event, handler)

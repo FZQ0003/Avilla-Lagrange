@@ -95,7 +95,7 @@ class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
     @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrQuote)
     async def reply(self, raw_element: LgrQuote) -> Reference:
         scene = self.context.scene if self.context else Selector().land('qq')
-        return Reference(scene.message(raw_element.seq))
+        return Reference(scene.message(str(raw_element.seq)))
 
     # @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrText)
     # async def dice(self, raw_element: ...) -> Dice:

@@ -9,5 +9,5 @@ class LagrangeResource(Resource[bytes]):
     res: ...
 
     def __init__(self, res, res_id: str = ''):
-        super().__init__(Selector().land('qq').resourse(res_id if res_id else id(res)))
+        super().__init__(Selector().land('qq').resourse(res_id if res_id else str(id(res))))
         self.res = res

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from launart import Service, Launart, any_completed
+from launart.status import Phase
 
 if TYPE_CHECKING:
     from .connection import LagrangeClientService
@@ -9,8 +10,14 @@ if TYPE_CHECKING:
 
 class LagrangeService(Service):
     id = 'lagrange.service'
-    required = set()
-    stages = {'preparing', 'blocking', 'cleanup'}
+
+    @property
+    def required(self) -> set[str]:
+        return set()
+
+    @property
+    def stages(self) -> set[Phase]:
+        return {'preparing', 'blocking', 'cleanup'}
 
     protocol: 'LagrangeProtocol'
     connection_map: dict[int, 'LagrangeClientService']

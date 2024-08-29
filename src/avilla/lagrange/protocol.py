@@ -22,8 +22,8 @@ class LagrangeConfig(ProtocolConfig):
     device_info_path: os.PathLike | str = './device.json'
     sign_info_path: os.PathLike | str = './sig.bin'
     # cache_path: os.PathLike | str = './cache.json'
-    device_info: DeviceInfo = None
-    sign_info: SigInfo = None
+    device_info: DeviceInfo | None = None
+    sign_info: SigInfo | None = None
     # cache: dict = None
 
     def __post_init__(self):
