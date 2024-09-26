@@ -24,3 +24,4 @@ dist/
 # Temp
 device.json
 sig.bin
+*.db
