@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     "avilla-core>=1.0.0a26",
-    "lagrange-python>=0.1.1",
+    "lagrange-python>=0.1.3",
     "avilla-standard-qq>=1.0.0a21",
 ]
 requires-python = ">=3.10"
@@ -26,7 +26,7 @@ includes = ["src/avilla/lagrange/"]
 
 [tool.pdm.dev-dependencies]
 test = [
-    "pytest>=8.3.3",
+    "pytest>=8.0.0",
 ]
 
 [tool.pytest.ini_options]
