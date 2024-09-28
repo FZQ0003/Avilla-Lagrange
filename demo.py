@@ -2,7 +2,7 @@ import os
 
 from avilla.core import Avilla, Context, MessageReceived
 
-from avilla.lagrange.protocol import LagrangeConfig, LagrangeProtocol
+from avilla.lagrange.protocol import LagrangeConfig, LagrangeGlobalConfig, LagrangeProtocol
 
 avilla = Avilla()
 
@@ -12,7 +12,8 @@ config = LagrangeConfig(
     int(os.getenv('LAGRANGE_UIN', '0')),
     sign_url=os.getenv('LAGRANGE_SIGN_URL', '')
 )
-avilla.apply_protocols(LagrangeProtocol().configure(config))
+global_config = LagrangeGlobalConfig('demo-database.db')
+avilla.apply_protocols(LagrangeProtocol(global_config).configure(config))
 
 
 @avilla.listen(MessageReceived)

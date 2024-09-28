@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-# import base64
 from typing import TYPE_CHECKING
 
 from avilla.core import Context
@@ -45,6 +42,7 @@ from lagrange.client.message.elems import (
     # Reaction as LgrReaction,
     Poke as LgrPoke,
     MarketFace as LgrMarketFace,
+    # File as LgrFile,
 )
 
 from .elements import MarketFaceEx

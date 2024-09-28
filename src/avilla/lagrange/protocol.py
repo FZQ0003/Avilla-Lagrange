@@ -1,4 +1,3 @@
-# import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,9 +8,14 @@ from avilla.core.protocol import ProtocolConfig, BaseProtocol
 from graia.ryanvk import merge, ref
 from lagrange.info import DeviceInfo, SigInfo
 
-from .connection import LagrangeClientService
+from .client import LagrangeClientService
 from .const import SIGN_SEQ
 from .service import LagrangeService
+
+
+@dataclass
+class LagrangeGlobalConfig(ProtocolConfig):
+    database_path: os.PathLike[str] | str = ':memory:'
 
 
 @dataclass
@@ -19,39 +23,45 @@ class LagrangeConfig(ProtocolConfig):
     uin: int
     protocol: Literal['linux', 'macos', 'windows'] = 'linux'
     sign_url: str = ''
-    device_info_path: os.PathLike | str = './device.json'
-    sign_info_path: os.PathLike | str = './sig.bin'
-    # cache_path: os.PathLike | str = './cache.json'
+    device_info_path: os.PathLike[str] | str = './device.json'
+    sign_info_path: os.PathLike[str] | str = './sig.bin'
     device_info: DeviceInfo | None = None
     sign_info: SigInfo | None = None
-    # cache: dict = None
+    allow_self_msg: bool = False
 
     def __post_init__(self):
         # Check if info is pre-defined (use temp path instead)
-        # device info
-        if isinstance(self.device_info, DeviceInfo):
+        if self.device_info:
             self.device_info_path = ''
+        if self.sign_info:
+            self.sign_info_path = ''
+    
+    def read_info(self, force: bool = False) -> tuple[DeviceInfo, SigInfo]:
+        if self.device_info and not force:
+            ...
         elif Path(self.device_info_path).is_file():
             with open(self.device_info_path, 'rb') as f:
                 self.device_info = DeviceInfo.load(f.read())
         else:
             self.device_info = DeviceInfo.generate(self.uin)
-        # sign info
-        if isinstance(self.sign_info, SigInfo):
-            self.sign_info_path = ''
+        if self.sign_info and not force:
+            ...
+        elif self.sign_info:
+            self.sign_info = self.sign_info
         elif Path(self.sign_info_path).is_file():
             with open(self.sign_info_path, 'rb') as f:
                 self.sign_info = SigInfo.load(f.read())
         else:
             self.sign_info = SigInfo.new(SIGN_SEQ)
-        # TODO: cache
-        # if isinstance(self.cache, dict):
-        #     self.cache_path = ''
-        # elif Path(self.cache_path).is_file():
-        #     with open(self.cache_path, 'r') as f:
-        #         self.cache = json.load(f)
-        # else:
-        #     self.cache = {}
+        return self.device_info, self.sign_info
+    
+    def save_info(self) -> None:
+        if self.device_info and not Path(self.device_info_path).is_dir():
+            with open(self.device_info_path, 'wb') as f:
+                f.write(self.device_info.dump())
+        if self.sign_info and not Path(self.sign_info_path).is_dir():
+            with open(self.sign_info_path, 'wb') as f:
+                f.write(self.sign_info.dump())
 
 
 def _import_performs():
@@ -77,14 +87,16 @@ class LagrangeProtocol(BaseProtocol):
         )
     }
 
-    def __init__(self):
-        self.service = LagrangeService(self)
+    def __init__(self, config: LagrangeGlobalConfig = LagrangeGlobalConfig()):
+        self.service = LagrangeService(self, config)
 
     def ensure(self, avilla: Avilla):
         self.avilla = avilla
         avilla.launch_manager.add_component(self.service)
 
-    def configure(self, config: LagrangeConfig):
+    def configure(self, config: ProtocolConfig):
+        if not isinstance(config, LagrangeConfig):
+            raise ValueError('Invalid config')
         # int for keys, not str
-        self.service.connection_map[int(config.uin)] = LagrangeClientService(self, config)
+        self.service.service_map[int(config.uin)] = LagrangeClientService(self, config)
         return self

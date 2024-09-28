@@ -70,11 +70,13 @@ class TestTable:
 
     def test_table_sql_insert(self):
         test_str = self.table_a.sql_insert()
-        assert test_str.startswith('INSERT INTO SampleTableA VALUES(')
+        assert test_str.startswith('INSERT OR REPLACE INTO SampleTableA VALUES(')
         assert test_str.endswith(')')
         assert test_str[test_str.find('(') + 1:-1] == ':id,:name,:data'
         test_str = self.table_a.sql_insert(use_key_name=False)
         assert test_str[test_str.find('(') + 1:-1] == '?,?,?'
+        test_str = self.table_a.sql_insert(replace=False)
+        assert test_str.startswith('INSERT OR IGNORE INTO SampleTableA VALUES(')
 
     def test_table_sql_select(self):
         assert self.table_b.sql_select() == 'SELECT * FROM SampleTableB WHERE id = :id'

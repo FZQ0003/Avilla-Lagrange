@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from avilla.core.resource import Resource
 from avilla.core.selector import Selector
 

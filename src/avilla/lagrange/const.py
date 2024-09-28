@@ -13,11 +13,11 @@ PLATFORM = Platform(
     Abstract(
         protocol='lagrange-python',
         maintainers=[{'name': 'LagrangeDev'}],
-        humanized_name='Lagrange Protocol',
+        humanized_name='Lagrange-python Protocol',
     ),
     Land(
         'lagrange',
         [{'name': 'GraiaProject'}, {'name': 'F_Qilin'}],
-        humanized_name='Lagrange for Avilla',
+        humanized_name='Lagrange-python for Avilla',
     ),
 )

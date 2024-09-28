@@ -1,13 +1,10 @@
-import base64
-import builtins
-import json
 import sqlite3
 from collections.abc import Mapping, Sequence, ValuesView
 from contextlib import contextmanager
-from dataclasses import fields, is_dataclass
-from importlib import import_module
-from types import ModuleType, NoneType
+from types import NoneType
 from typing import TypeAlias, Any
+
+from .misc import get_fields, object_to_dict, dict_to_object, json_encode_object, json_decode_object
 
 T_DB: TypeAlias = int | float | str | bytes | NoneType
 MAP_DB: dict[type, str] = {
@@ -19,101 +16,10 @@ MAP_DB: dict[type, str] = {
 }
 
 
-def _object_to_type_str(obj: Any) -> str:
-    if isinstance(obj, ModuleType):
-        return obj.__name__
-    if not isinstance(obj, type):
-        obj = type(obj)
-    class_name = repr(obj).split("'")[1]
-    module_name = obj.__module__
-    if not class_name.startswith(module_name):
-        class_name = module_name + '.' + class_name
-    # format: module.class
-    return class_name
-
-
-def _type_str_to_object(type_str: str) -> ModuleType | type | None:
-    cls_list = type_str.split('.')
-    try:
-        cls = import_module(cls_list[0])
-        cls_list.pop(0)
-    except ModuleNotFoundError:
-        cls = builtins
-    for attr in cls_list:
-        if not (cls := getattr(cls, attr, None)):
-            break
-    return cls
-
-
-def _get_fields(obj: Any) -> dict[str, type]:
-    if is_dataclass(obj):
-        output = {}
-        for field in fields(obj):  # noqa
-            if field.init:
-                if isinstance(field.type, str):
-                    o_type = _type_str_to_object(field.type)
-                    if isinstance(o_type, type):
-                        output[field.name] = o_type
-                else:
-                    output[field.name] = field.type
-        return output
-    if hasattr(obj, '__annotations__'):
-        return obj.__annotations__.copy()
-    return {}
-
-
-def _object_to_dict(obj: Any) -> dict[str, Any]:
-    if is_dataclass(obj):
-        output = {}
-        for class_field in fields(obj):  # noqa
-            if class_field.init:
-                # No need to handle nested classes
-                output[class_field.name] = getattr(obj, class_field.name)
-        return output
-    if hasattr(obj, '__dict__'):
-        return obj.__dict__.copy()
-    return {}
-
-
-def _dict_to_object(cls, obj: dict[str, Any]) -> Any:
-    return cls(**obj)
-
-
-def _json_encoder(obj: Any) -> str | dict[str, Any]:
-    if isinstance(obj, bytes):
-        return 'base64:' + base64.b64encode(obj).decode()
-    if output := _object_to_dict(obj):
-        output['_type'] = _object_to_type_str(obj)
-        return output
-    # TODO: annotations? slots?
-    raise TypeError(f'Object of type {obj.__class__.__name__} '
-                    f'is not serializable')
-
-
-def _json_decoder(obj: dict[str, Any]) -> Any:
-    for key, value in obj.items():
-        if isinstance(value, str) and value.startswith('base64:'):
-            obj[key] = base64.b64decode(value[7:])
-    if (obj_type := obj.pop('_type', '')) and callable(cls := _type_str_to_object(obj_type)):
-        try:
-            return _dict_to_object(cls, obj)
-        except TypeError:
-            ...
-    return obj
-
-
-def _json_encode_object(obj) -> str:
-    return 'json:' + json.dumps(obj, separators=(',', ':'), default=_json_encoder)
-
-
-def _json_decode_object(s: str):
-    return json.loads(s[5:] if s.startswith('json:') else s, object_hook=_json_decoder)
-
-
 class Table:
     structure: type | Mapping[str, type]
     name: str = ''
-    primary_key: str = ''
+    primary_key: str = ''  # TODO: more columns?
     database: 'Database | None' = None
 
     def __init__(self, structure: type | Mapping[str, type] | None = None,
@@ -131,18 +37,20 @@ class Table:
 
     @property
     def fields(self) -> dict[str, type]:
-        return dict(self.structure) if isinstance(self.structure, Mapping) else _get_fields(self.structure)
+        return dict(self.structure) if isinstance(self.structure, Mapping) else get_fields(self.structure)
 
     def sql_create(self) -> str:
         sql_col = ','.join(
-            f"{_n} {MAP_DB.get(_t, 'TEXT')}{' PRIMARY KEY' if self.primary_key == _n else ''}"
+            f"{_n} {MAP_DB.get(_t, 'TEXT')}"
+            # f"{' UNIQUE' if _n in self.unique_keys else ''}"
+            f"{' PRIMARY KEY' if self.primary_key == _n else ''}"
             for _n, _t in self.fields.items()
         )
         return f'CREATE TABLE IF NOT EXISTS {self.name}({sql_col})'
 
-    def sql_insert(self, use_key_name: bool = True) -> str:
+    def sql_insert(self, use_key_name: bool = True, replace: bool = True) -> str:
         sql_col = ','.join(f':{_}' if use_key_name else '?' for _ in self.fields.keys())
-        return f'INSERT INTO {self.name} VALUES({sql_col})'
+        return f"INSERT OR {'REPLACE' if replace else 'IGNORE'} INTO {self.name} VALUES({sql_col})"
 
     def sql_select(self, where: Sequence[str] = tuple(),
                    use_key_name: bool = True, use_primary_key: bool = True) -> str:
@@ -160,11 +68,11 @@ class Table:
                 raise ValueError('No database selected')
         # Params
         if isinstance(params, Sequence | ValuesView):
-            params = [_ if isinstance(_, T_DB) else _json_encode_object(_) for _ in params]
+            params = [_ if isinstance(_, T_DB) else json_encode_object(_) for _ in params]
         else:
             if not isinstance(params, Mapping):
-                params = _object_to_dict(params)
-            params = {_k: _v if isinstance(_v, T_DB) else _json_encode_object(_v)
+                params = object_to_dict(params)
+            params = {_k: _v if isinstance(_v, T_DB) else json_encode_object(_v)
                       for _k, _v in params.items()}
         # Execute
         cursor = db.execute(sql, params)
@@ -173,9 +81,9 @@ class Table:
         for result in cursor.fetchall():
             tmp: dict[str, Any] = dict(zip(
                 result_header,
-                (_json_decode_object(_) if isinstance(_, str) and _.startswith('json:') else _ for _ in result)
+                (json_decode_object(_) if isinstance(_, str) and _.startswith('json:') else _ for _ in result)
             ))
-            output.append(tmp if isinstance(self.structure, Mapping) else _dict_to_object(self.structure, tmp))
+            output.append(tmp if isinstance(self.structure, Mapping) else dict_to_object(self.structure, tmp))
         return output
 
 
@@ -212,15 +120,19 @@ class Database:
     def tables(self) -> list[Table]:
         return self._tables
 
+    def get_table(self, table_name: str = '') -> Table:
+        result = [_ for _ in self._tables if _.name == table_name] if table_name else self._tables
+        if result:
+            return result[0]
+        raise ValueError(f'No table found: {table_name}')
+
     @contextmanager
     def edit(self, table_name: str = '', commit: bool = True):
-        if not self.connected:
+        if not self._connected:
             self.connect()
-        result = [_ for _ in self._tables if _.name == table_name] if table_name else self._tables
-        if not result:
-            raise ValueError(f'No table found: {table_name}')
+        table = self.get_table(table_name)
         try:
-            yield result[0]
+            yield table
         finally:
             if commit:
                 self.commit()

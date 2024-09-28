@@ -2,7 +2,7 @@
 import inspect
 import logging
 
-from lagrange.utils.log import log, _Logger
+from lagrange.utils.log import log, _Logger  # noqa
 from loguru import logger
 
 

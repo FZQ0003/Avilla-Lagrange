@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-# from datetime import datetime
 from typing import TYPE_CHECKING
 
 from avilla.core.elements import (
@@ -43,6 +40,7 @@ from lagrange.client.message.elems import (
     # Reaction as LgrReaction,
     Poke as LgrPoke,
     MarketFace as LgrMarketFace,
+    # File as LgrFile,
 )
 
 from .elements import MarketFaceEx
@@ -51,15 +49,13 @@ from ...resource import LagrangeResource
 
 if TYPE_CHECKING:
     from avilla.core.context import Context
-    from ...account import LagrangeAccount
 
 
 class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
     m.namespace = 'avilla.protocol/lagrange::message'
     m.identify = 'deserialize'
 
-    context: OptionalAccess[Context] = OptionalAccess()
-    account: OptionalAccess[LagrangeAccount] = OptionalAccess()
+    context: OptionalAccess['Context'] = OptionalAccess()
 
     @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrText)
     async def text(self, raw_element: LgrText) -> Text:

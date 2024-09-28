@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, TypeAlias
 
 from lagrange.client.events.service import (
     ClientOnline,
@@ -18,6 +18,8 @@ from lagrange.client.events.group import (
     # GroupNameChanged,
     # GroupReaction,
     # GroupAlbumUpdate,
+    # GroupInvite,
+    # GroupMemberJoinedByInvite,
 )
 from lagrange.client.events.friend import (
     FriendMessage,
@@ -38,6 +40,7 @@ from lagrange.client.message.elems import (
     # Reaction,
     Poke,
     MarketFace,
+    # File,
 )
 
 AVAILABLE_EVENTS = (
@@ -56,10 +59,12 @@ AVAILABLE_EVENTS = (
     # GroupNameChanged,
     # GroupReaction,
     # GroupAlbumUpdate,
+    # GroupInvite,
+    # GroupMemberJoinedByInvite,
     FriendMessage,
     # FriendNudge,
 )
-Event = Union[
+Event: TypeAlias = Union[
     ClientOnline,
     ClientOffline,
     ServerKick,
@@ -75,6 +80,8 @@ Event = Union[
     # GroupNameChanged,
     # GroupReaction,
     # GroupAlbumUpdate,
+    # GroupInvite,
+    # GroupMemberJoinedByInvite,
     FriendMessage,
     # FriendNudge,
 ]
@@ -94,8 +101,9 @@ AVAILABLE_MSG_ELEMENTS = (
     # Reaction,
     Poke,
     MarketFace,
+    # File,
 )
-Element = Union[
+Element: TypeAlias = Union[
     Text,
     Quote,
     Json,
@@ -110,4 +118,5 @@ Element = Union[
     # Reaction,
     Poke,
     MarketFace,
+    # File,
 ]
