@@ -1,12 +1,14 @@
 import time
 from dataclasses import dataclass, field
 
+from ..types import Element
+
 
 @dataclass
 class MessageRecord:
     friend_uin: int
     seq: int
-    chain: list
+    chain: list[Element]
     group_uin: int = 0
     target_uin: int = 0  # to record sent message
     msg_id: int = 0
@@ -21,6 +23,10 @@ class MessageRecord:
                 # Seq here may vary for different accounts and may not be unique
                 # Only generate for friend messages with no id
                 self.msg_id = hash((self.friend_uin, self.seq))
+
+    @property
+    def msg(self) -> str:
+        return ''.join(getattr(_, 'text', '') or _.display for _ in self.chain)
 
     # TODO: FriendInfo GroupMemberInfo MessageHash
 

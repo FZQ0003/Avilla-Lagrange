@@ -49,6 +49,7 @@ from .elements import MarketFaceEx
 from ...capability import LagrangeCapability
 from ...const import TEXT_AT_ALL
 from ...resource import LagrangeResource
+from ...service import LagrangeDatabase
 
 if TYPE_CHECKING:
     from ...account import LagrangeAccount  # noqa: F401
@@ -96,16 +97,35 @@ class LagrangeMessageSerializePerform((m := AccountCollector['LagrangeProtocol',
     @m.entity(LagrangeCapability.serialize_element, element=Notice)
     async def notice(self, element: Notice) -> LgrAt:
         uin = int(element.target['member'])
-        return LgrAt(uin=uin, uid=self.account.get_uid(uin), text=f"{element.display or ''}")
+        db: LagrangeDatabase = self.protocol.service.database
+        return LgrAt(uin=uin, uid=db.get_user(uin)[1], text=f"{element.display or ''}")
 
     @m.entity(LagrangeCapability.serialize_element, element=NoticeAll)
     async def notice_all(self, element: NoticeAll) -> LgrAtAll:
         return LgrAtAll(text=TEXT_AT_ALL)
 
     @m.entity(LagrangeCapability.serialize_element, element=Reference)
-    async def reply(self, element: Reference) -> LgrQuote:
-        # return LgrQuote(seq=int(element.message['message']))
-        ...  # TODO: cache seq
+    async def reply(self, element: Reference) -> LgrQuote | None:
+        # TODO: reply
+        if group_uin := int(element.message.pattern.get('group', 0)):
+            friend_uin = int(element.message.pattern.get('member', 0))
+        else:
+            friend_uin = int(element.message.pattern.get('friend', 0))
+        db: LagrangeDatabase = self.protocol.service.database
+        record = db.get_msg_record(
+            msg_id=int(element.message['message']),
+            seq=int(element.message['message']),
+            friend_uin=friend_uin,
+            group_uin=group_uin
+        )
+        return LgrQuote(
+            text=f'[quote:{record.msg}]',
+            seq=record.seq,
+            uid=db.get_user(record.friend_uin)[1],
+            uin=record.friend_uin,
+            timestamp=record.time,
+            msg=record.msg
+        )
 
     # @m.entity(LagrangeCapability.serialize_element, element=Dice)
     # async def dice(self, element: Dice) -> ...:

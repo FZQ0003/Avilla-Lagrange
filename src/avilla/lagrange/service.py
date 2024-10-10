@@ -40,11 +40,22 @@ class LagrangeDatabase(Database):
         table = self._tables[0]
         table.execute(table.sql_insert(), {'uin': uin, 'uid': uid})
 
-    def get_msg_record(self, msg_id: int) -> MessageRecord:
+    def get_msg_record(self, msg_id: int = 0, seq: int = 0,
+                       friend_uin: int = 0, group_uin: int = 0, target_uin: int = 0) -> MessageRecord:
         table = self._tables[1]
-        if result := table.execute(table.sql_select(), {'msg_id': msg_id}):
+        result = table.execute(
+            'SELECT * FROM message_record '
+            'WHERE msg_id = ? '
+            'OR seq = ? AND friend_uin = ? AND target_uin IN (?, 0) '
+            'OR seq = ? AND group_uin = ?',
+            (msg_id, seq, friend_uin, target_uin, seq, group_uin)
+        )
+        if result:
             return result[0]
-        raise ValueError(f'Message not found: msg_id = {msg_id}')
+        raise ValueError(
+            f'Message not found: msg_id = {msg_id}, seq = {seq}, '
+            f'friend_uin = {friend_uin}, group_uin = {group_uin}, target_uin = {target_uin}'
+        )
 
     def insert_msg_record(self, record: MessageRecord):
         table = self._tables[1]
