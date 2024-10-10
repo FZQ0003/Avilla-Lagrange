@@ -9,7 +9,7 @@ from graia.ryanvk import merge, ref
 from lagrange.info import DeviceInfo, SigInfo
 
 from .client import LagrangeClientService
-from .const import SIGN_SEQ
+from .const import SIGN_SEQ, SIGN_URL
 from .service import LagrangeService
 
 
@@ -22,7 +22,7 @@ class LagrangeGlobalConfig(ProtocolConfig):
 class LagrangeConfig(ProtocolConfig):
     uin: int
     protocol: Literal['linux', 'macos', 'windows'] = 'linux'
-    sign_url: str = ''
+    sign_url: str = SIGN_URL
     device_info_path: os.PathLike[str] | str = './device.json'
     sign_info_path: os.PathLike[str] | str = './sig.bin'
     device_info: DeviceInfo | None = None

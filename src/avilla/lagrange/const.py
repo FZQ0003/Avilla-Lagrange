@@ -1,5 +1,8 @@
 from avilla.core import Land, Platform, Abstract
 
+# From Lagrange.Core
+SIGN_URL = 'https://sign.lagrangecore.org/api/sign/25765'
+
 # From lagrange-python
 SIGN_SEQ = 8848
 

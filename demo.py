@@ -2,15 +2,17 @@ import os
 
 from avilla.core import Avilla, Context, MessageReceived
 
+from avilla.lagrange.const import SIGN_URL
 from avilla.lagrange.protocol import LagrangeConfig, LagrangeGlobalConfig, LagrangeProtocol
 
 avilla = Avilla()
 
 
-# View https://github.com/LagrangeDev/Lagrange.Core to get recent sign url.
+# The sign url provided here may be outdated.
+# View https://github.com/LagrangeDev/Lagrange.Core to get recent one.
 config = LagrangeConfig(
     int(os.getenv('LAGRANGE_UIN', '0')),
-    sign_url=os.getenv('LAGRANGE_SIGN_URL', '')
+    sign_url=os.getenv('LAGRANGE_SIGN_URL', SIGN_URL)
 )
 global_config = LagrangeGlobalConfig('demo-database.db')
 avilla.apply_protocols(LagrangeProtocol(global_config).configure(config))
