@@ -1,4 +1,4 @@
-"""Some magic methods due to defects in Avilla & Avilla-* adapters."""
+"""Some magic methods due to defects in Avilla & Avilla-* components."""
 from contextlib import nullcontext
 
 from avilla.core import Avilla, BaseProtocol, AvillaEvent
