@@ -8,12 +8,11 @@ from lagrange.info.app import app_list
 from lagrange.utils.sign import sign_provider
 from launart import Service, Launart, any_completed
 from launart.status import Phase
-from loguru import logger
 
 from .account import LagrangeAccount
 from .capability import LagrangeCapability
 from .const import LAND, PLATFORM
-from .types import AVAILABLE_EVENTS, Event
+from .types import AVAILABLE_EVENTS
 
 if TYPE_CHECKING:
     from .protocol import LagrangeProtocol, LagrangeConfig
@@ -114,18 +113,9 @@ class LagrangeClientService(Service):
             # Init account
             self.init_account()
             capability = LagrangeCapability(self.staff)
-
-            async def handler(client: Client, event: Event):
-                # Handle event
-                try:
-                    await capability.handle_event(event)
-                except NotImplementedError:
-                    logger.warning(f'Client {client.uin} received unsupported event: '
-                                   f'{event.__class__.__name__}')
-
             # lagrange.subscribe
             for a_event in AVAILABLE_EVENTS:
-                self.client.events.subscribe(a_event, handler)
+                self.client.events.subscribe(a_event, capability.handle_event)
             self.client.connect()
             # lagrange.login
             if not await self.login():
@@ -142,5 +132,4 @@ class LagrangeClientService(Service):
             )
 
         async with self.stage('cleanup'):
-            # await self.client.stop()
-            ...
+            await self.client.stop()
