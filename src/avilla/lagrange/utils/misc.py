@@ -75,7 +75,7 @@ def json_encoder(obj: Any) -> str | dict[str, Any]:
         output['_type'] = object_to_type_str(obj)
         return output
     # TODO: annotations? slots?
-    raise TypeError(f'Object of type {obj.__class__.__name__} '
+    raise TypeError(f'Object of type {type(obj).__name__} '
                     f'is not serializable')
 
 

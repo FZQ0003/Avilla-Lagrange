@@ -31,7 +31,7 @@ class Table:
         if name:
             self.name = name
         elif not self.name:
-            self.name = self.__class__.__name__ if isinstance(self.structure, Mapping) else self.structure.__name__
+            self.name = type(self).__name__ if isinstance(self.structure, Mapping) else self.structure.__name__
         if primary_key:
             self.primary_key = primary_key
 
