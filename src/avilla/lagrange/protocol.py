@@ -11,6 +11,7 @@ from lagrange.info import DeviceInfo, SigInfo
 from .client import LagrangeClientService
 from .const import SIGN_SEQ, SIGN_URL
 from .service import LagrangeService
+from .utils.broadcast import AvillaLagrangeStopDispatcher
 
 
 @dataclass
@@ -93,6 +94,7 @@ class LagrangeProtocol(BaseProtocol):
     def ensure(self, avilla: Avilla):
         self.avilla = avilla
         avilla.launch_manager.add_component(self.service)
+        avilla.broadcast.finale_dispatchers.append(AvillaLagrangeStopDispatcher())
 
     def configure(self, config: ProtocolConfig):
         if not isinstance(config, LagrangeConfig):

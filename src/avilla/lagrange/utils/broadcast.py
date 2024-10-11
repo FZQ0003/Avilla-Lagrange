@@ -13,7 +13,7 @@ class LagrangeRawEvent(Dispatchable):
     raw: BaseEvent
 
     class Dispatcher(BaseDispatcher):
-        """A dispatcher to collect current Lagrange event."""
+        """A dispatcher to collect current Lagrange client & event."""
 
         @staticmethod
         async def catch(interface: DispatcherInterface['LagrangeRawEvent']):  # noqa # pyright: ignore
@@ -71,3 +71,12 @@ class AvillaLagrangeClientDispatcher(BaseDispatcher):
             if isinstance(account, LagrangeAccount):
                 return account.client
             return self.handle_error()
+
+
+class AvillaLagrangeStopDispatcher(BaseDispatcher):
+    """A dispatcher to stop catching lagrange client/event(s) for compatibility."""
+
+    async def catch(self, interface: DispatcherInterface):
+        if interface.annotation in (list[Client], Client) or issubclass(interface.annotation, BaseEvent):
+            logger.warning('Listener with lagrange client/event(s) was triggered by non-lagrange event')
+            interface.stop()
