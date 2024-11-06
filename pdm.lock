@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6a6ffe6b60159c6e05a562c6dd5406201556d13e988434f1285fa03ca1135d7a"
+content_hash = "sha256:3f5c0c7915202bc133b3bfd9a2cd11dcf0bb0e6777d64848ce7e89538fa8eced"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -161,6 +161,20 @@ files = [
 ]
 
 [[package]]
+name = "elaina-flywheel"
+version = "0.6.0"
+requires_python = ">=3.9"
+summary = ""
+groups = ["default"]
+dependencies = [
+    "typing-extensions>=4.10.0",
+]
+files = [
+    {file = "elaina_flywheel-0.6.0-py3-none-any.whl", hash = "sha256:d01ff36ba61308c21ff239a709fbaa28288f073a7c8dfe0d993a74193ce48e23"},
+    {file = "elaina_flywheel-0.6.0.tar.gz", hash = "sha256:dbc072ad7eeb250df35c638e5365de037f134965bbe374bbeefbc53f18b5c55a"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 requires_python = ">=3.7"
@@ -170,6 +184,20 @@ marker = "python_version < \"3.11\""
 files = [
     {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
     {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
+]
+
+[[package]]
+name = "flywheel-fncollector"
+version = "0.2.1"
+requires_python = ">=3.9"
+summary = "Add a FnCollector for Ryanvk Flywheel"
+groups = ["default"]
+dependencies = [
+    "elaina-flywheel<0.7.0,>=0.6.0",
+]
+files = [
+    {file = "flywheel_fncollector-0.2.1-py3-none-any.whl", hash = "sha256:fa07f2f2d92ca3c042ff932c705404720f41d736a6c71f3a3bc10a29c554db21"},
+    {file = "flywheel_fncollector-0.2.1.tar.gz", hash = "sha256:876d1bb84542eaa038f05d966460152b835f4c49d6c426a823f5c12c07eecbe8"},
 ]
 
 [[package]]

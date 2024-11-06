@@ -79,6 +79,7 @@ class LagrangeProtocol(BaseProtocol):
     _import_performs()
     artifacts = {
         **merge(
+            ref('avilla.protocol/lagrange::compat'),
             ref('avilla.protocol/lagrange::action', 'message'),
             ref('avilla.protocol/lagrange::event', 'lifespan'),
             ref('avilla.protocol/lagrange::event', 'message'),

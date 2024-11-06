@@ -9,6 +9,7 @@ dependencies = [
     "avilla-core>=1.0.0a27",
     "lagrange-python>=0.1.5",
     "avilla-standard-qq>=1.0.0a21",
+    "flywheel-fncollector>=0.2.1",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
