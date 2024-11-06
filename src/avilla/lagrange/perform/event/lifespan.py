@@ -16,7 +16,7 @@ class LagrangeEventLifespanPerform((m := LagrangeClientCollector())._):
     m.namespace = 'avilla.protocol/lagrange::event'
     m.identify = 'lifespan'
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOnline)
+    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOnline)  # type: ignore
     async def online(self, raw_event: ClientOnline):
         account: LagrangeAccount = self.service.account
         client: Client = self.client
@@ -24,7 +24,7 @@ class LagrangeEventLifespanPerform((m := LagrangeClientCollector())._):
         logger.info(f'Account {client.uin} online')
         return AccountRegistered(avilla=self.avilla, account=account)
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOffline)
+    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOffline)  # type: ignore
     async def offline(self, raw_event: ClientOffline):
         account: LagrangeAccount = self.service.account
         client: Client = self.client
@@ -35,7 +35,7 @@ class LagrangeEventLifespanPerform((m := LagrangeClientCollector())._):
         logger.info(f"Account {client.uin} offline, it is {'' if raw_event.recoverable else 'not '}recoverable")
         return AccountUnregistered(avilla=self.avilla, account=account)
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ServerKick)
+    @m.entity(LagrangeCapability.event_callback, raw_event=ServerKick)  # type: ignore
     async def kicked(self, raw_event: ServerKick):
         account: LagrangeAccount = self.service.account
         client: Client = self.client

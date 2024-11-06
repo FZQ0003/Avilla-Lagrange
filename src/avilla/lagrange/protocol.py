@@ -25,17 +25,17 @@ class LagrangeConfig(ProtocolConfig):
     protocol: Literal['linux', 'macos', 'windows'] = 'linux'
     sign_url: str = SIGN_URL
     device_info_path: os.PathLike[str] | str = './device.json'
-    sign_info_path: os.PathLike[str] | str = './sig.bin'
+    sig_info_path: os.PathLike[str] | str = './sig.bin'
     device_info: DeviceInfo | None = None
-    sign_info: SigInfo | None = None
+    sig_info: SigInfo | None = None
     allow_self_msg: bool = False
 
     def __post_init__(self):
         # Check if info is pre-defined (use temp path instead)
         if self.device_info:
             self.device_info_path = ''
-        if self.sign_info:
-            self.sign_info_path = ''
+        if self.sig_info:
+            self.sig_info_path = ''
     
     def read_info(self, force: bool = False) -> tuple[DeviceInfo, SigInfo]:
         if self.device_info and not force:
@@ -45,24 +45,24 @@ class LagrangeConfig(ProtocolConfig):
                 self.device_info = DeviceInfo.load(f.read())
         else:
             self.device_info = DeviceInfo.generate(self.uin)
-        if self.sign_info and not force:
+        if self.sig_info and not force:
             ...
-        elif self.sign_info:
-            self.sign_info = self.sign_info
-        elif Path(self.sign_info_path).is_file():
-            with open(self.sign_info_path, 'rb') as f:
-                self.sign_info = SigInfo.load(f.read())
+        elif self.sig_info:
+            self.sig_info = self.sig_info
+        elif Path(self.sig_info_path).is_file():
+            with open(self.sig_info_path, 'rb') as f:
+                self.sig_info = SigInfo.load(f.read())
         else:
-            self.sign_info = SigInfo.new(SIGN_SEQ)
-        return self.device_info, self.sign_info
+            self.sig_info = SigInfo.new(SIGN_SEQ)
+        return self.device_info, self.sig_info
     
     def save_info(self) -> None:
         if self.device_info and not Path(self.device_info_path).is_dir():
             with open(self.device_info_path, 'wb') as f:
                 f.write(self.device_info.dump())
-        if self.sign_info and not Path(self.sign_info_path).is_dir():
-            with open(self.sign_info_path, 'wb') as f:
-                f.write(self.sign_info.dump())
+        if self.sig_info and not Path(self.sig_info_path).is_dir():
+            with open(self.sig_info_path, 'wb') as f:
+                f.write(self.sig_info.dump())
 
 
 def _import_performs():

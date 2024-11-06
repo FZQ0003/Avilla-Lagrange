@@ -30,13 +30,13 @@ class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
             message = message.exclude(Reference)
         return message, reply
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupMessage)
+    @m.entity(LagrangeCapability.event_callback, raw_event=GroupMessage)  # type: ignore
     async def group(self, raw_event: GroupMessage):
         self.database.insert_user(raw_event.uin, raw_event.uid)
         self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.uin,
             seq=raw_event.seq,
-            chain=raw_event.msg_chain,
+            chain=raw_event.msg_chain,  # type: ignore
             group_uin=raw_event.grp_id,
             time=raw_event.time
         ))
@@ -60,14 +60,14 @@ class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
             ),
         )
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=FriendMessage)
+    @m.entity(LagrangeCapability.event_callback, raw_event=FriendMessage)  # type: ignore
     async def friend(self, raw_event: FriendMessage):
         self.database.insert_user(raw_event.from_uin, raw_event.from_uid)
         self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
         self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.from_uin,
             seq=raw_event.seq,
-            chain=raw_event.msg_chain,
+            chain=raw_event.msg_chain,  # type: ignore
             target_uin=raw_event.to_uin,
             msg_id=raw_event.msg_id,
             time=raw_event.timestamp
@@ -96,7 +96,7 @@ class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
 
     # TODO: MessageSent == GroupMessage / FriendMessage, but sender == self
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupRecall)
+    @m.entity(LagrangeCapability.event_callback, raw_event=GroupRecall)  # type: ignore
     async def group_recall(self, raw_event: GroupRecall):
         account: LagrangeAccount = self.service.account
         group: Selector = Selector().land(account.route['land']).group(str(raw_event.grp_id))

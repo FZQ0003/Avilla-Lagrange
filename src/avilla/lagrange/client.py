@@ -64,7 +64,7 @@ class LagrangeClientService(Service):
 
     async def login(self) -> bool:
         # Use LagrangeEventLifespanPerform.online() to enable self.account.status
-        if self.config.sign_info and self.config.sign_info.d2:
+        if self.config.sig_info and self.config.sig_info.d2:
             if not await self.client.register():
                 return await self.client.login()
             return True

@@ -57,38 +57,38 @@ class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
 
     context: OptionalAccess['Context'] = OptionalAccess()
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrText)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrText)  # type: ignore
     async def text(self, raw_element: LgrText) -> Text:
         return Text(raw_element.text)
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrEmoji)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrEmoji)  # type: ignore
     async def face(self, raw_element: LgrEmoji) -> Face:
         return Face(str(raw_element.id))
 
     # TODO: resource
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrImage)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrImage)  # type: ignore
     async def image(self, raw_element: LgrImage) -> Picture:  # TODO: FlashImage?
         return Picture(LagrangeResource(raw_element, raw_element.url))
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAudio)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAudio)  # type: ignore
     async def record(self, raw_element: LgrAudio) -> Audio:
         return Audio(LagrangeResource(raw_element, raw_element.file_key))
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrVideo)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrVideo)  # type: ignore
     async def video(self, raw_element: LgrVideo) -> Video:
         return Video(LagrangeResource(raw_element, raw_element.file_key))
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAt)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAt)  # type: ignore
     async def at(self, raw_element: LgrAt) -> Notice:
         scene = self.context.scene if self.context else Selector().land('qq')
         return Notice(scene.member(str(raw_element.uin)), raw_element.text)
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAtAll)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrAtAll)  # type: ignore
     async def at_all(self, raw_element: LgrAtAll) -> NoticeAll:
         return NoticeAll()
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrQuote)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrQuote)  # type: ignore
     async def reply(self, raw_element: LgrQuote) -> Reference:
         scene = self.context.scene if self.context else Selector().land('qq')
         return Reference(scene.message(str(raw_element.seq)))
@@ -97,19 +97,19 @@ class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
     # async def dice(self, raw_element: ...) -> Dice:
     #     return Dice()
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrPoke)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrPoke)  # type: ignore
     async def poke(self, raw_element: LgrPoke) -> Poke:
-        return Poke()
+        return Poke()  # TODO: type
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrJson)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrJson)  # type: ignore
     async def json(self, raw_element: LgrJson) -> Json:
         return Json(raw_element.raw.decode())
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrRaw)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrRaw)  # type: ignore
     async def xml(self, raw_element: LgrRaw) -> Xml:  # TODO: sure (xml)?
         return Xml(raw_element.data.decode())
 
-    # @m.entity(LagrangeCapability.deserialize_element, raw_element=...)
+    # @m.entity(LagrangeCapability.deserialize_element, raw_element=...)  # type: ignore
     # async def share(self, raw_element: ...) -> Share:
     #     return Share(
     #         url=...,
@@ -118,9 +118,9 @@ class LagrangeMessageDeserializePerform((m := ApplicationCollector())._):
     #         thumbnail=...,
     #     )
 
-    # TODO: forward, file
+    # TODO: forward, file, GreyTips
 
-    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrMarketFace)
+    @m.entity(LagrangeCapability.deserialize_element, raw_element=LgrMarketFace)  # type: ignore
     async def market_face(self, raw_element: LgrMarketFace) -> MarketFaceEx:
         return MarketFaceEx(
             id=raw_element.face_id.hex(),

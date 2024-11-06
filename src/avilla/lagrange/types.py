@@ -23,6 +23,8 @@ from lagrange.client.events.group import (
 )
 from lagrange.client.events.friend import (
     FriendMessage,
+    # FriendRecall,
+    # FriendRequest,
     # FriendNudge,
 )
 from lagrange.client.message.elems import (
@@ -41,6 +43,7 @@ from lagrange.client.message.elems import (
     Poke,
     MarketFace,
     # File,
+    # GreyTips,
 )
 
 AVAILABLE_EVENTS = (
@@ -62,6 +65,8 @@ AVAILABLE_EVENTS = (
     # GroupInvite,
     # GroupMemberJoinedByInvite,
     FriendMessage,
+    # FriendRecall,
+    # FriendRequest,
     # FriendNudge,
 )
 Event: TypeAlias = Union[
@@ -83,6 +88,8 @@ Event: TypeAlias = Union[
     # GroupInvite,
     # GroupMemberJoinedByInvite,
     FriendMessage,
+    # FriendRecall,
+    # FriendRequest,
     # FriendNudge,
 ]
 
@@ -102,6 +109,7 @@ AVAILABLE_MSG_ELEMENTS = (
     Poke,
     MarketFace,
     # File,
+    # GreyTips,
 )
 Element: TypeAlias = Union[
     Text,
@@ -119,4 +127,5 @@ Element: TypeAlias = Union[
     Poke,
     MarketFace,
     # File,
+    # GreyTips,
 ]

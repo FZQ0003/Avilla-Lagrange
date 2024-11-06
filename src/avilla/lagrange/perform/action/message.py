@@ -34,7 +34,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
             message.content.insert(0, Reference(reply))
         client: Client = self.account.client
         seq = await client.send_grp_msg(
-            await LagrangeCapability(self.account.staff).serialize_chain(message),
+            await LagrangeCapability(self.account.staff).serialize_chain(message),  # type: ignore
             int(target['group'])
         )
         context = self.account.get_context(target.member(self.account.route['account']))
@@ -74,7 +74,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
         client: Client = self.account.client
         chain = await LagrangeCapability(self.account.staff).serialize_chain(message)
         seq = await client.send_friend_msg(
-            chain,
+            chain,  # type: ignore
             self.protocol.service.database.get_user(int(target['friend']))[1]
         )
         # Manually insert into Database (lagrange-python will not record this)
@@ -122,7 +122,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
             raise RuntimeError(f"Failed to get message from {message['group']}: {message}")
         result = messages[-1]
         group = Selector().land(self.account.route['land']).group(message['group'])
-        content = await LagrangeCapability(self.account.staff).deserialize_chain(result.msg_chain)
+        content = await LagrangeCapability(self.account.staff).deserialize_chain(result.msg_chain)  # type: ignore
         return Message(
             str(result.seq),
             group,

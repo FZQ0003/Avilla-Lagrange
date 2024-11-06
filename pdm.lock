@@ -5,14 +5,14 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:8952d478dd8a6b718120980c44d737f543e89d35c44ab106ebe99c4431edb77d"
+content_hash = "sha256:6a6ffe6b60159c6e05a562c6dd5406201556d13e988434f1285fa03ca1135d7a"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
 
 [[package]]
 name = "avilla-core"
-version = "1.0.0a26"
+version = "1.0.0a27"
 requires_python = ">=3.9"
 summary = ""
 groups = ["default"]
@@ -24,8 +24,8 @@ dependencies = [
     "loguru>=0.6.0",
 ]
 files = [
-    {file = "avilla_core-1.0.0a26-py3-none-any.whl", hash = "sha256:a7098c24d227dce527d1be3803e85dbaa222d8ade62b614042e006ff6c097b55"},
-    {file = "avilla_core-1.0.0a26.tar.gz", hash = "sha256:d18f38838d72198e0e58b2b455879856c161ee47887610708bed4bc8428a3cf9"},
+    {file = "avilla_core-1.0.0a27-py3-none-any.whl", hash = "sha256:0a1d5a7828d042edc22b163ce34f7ff579bf99b772b2bcba07849adb0a09ae23"},
+    {file = "avilla_core-1.0.0a27.tar.gz", hash = "sha256:2935c40968e8625f9cc02539629eb0ae9023b77910dede01065e2e4415ed11ae"},
 ]
 
 [[package]]
@@ -230,7 +230,7 @@ files = [
 
 [[package]]
 name = "lagrange-python"
-version = "0.1.3"
+version = "0.1.5"
 requires_python = ">=3.9"
 summary = "An Python Implementation of NTQQ PC Protocol"
 groups = ["default"]
@@ -240,8 +240,8 @@ dependencies = [
     "typing-extensions>=4.7.0",
 ]
 files = [
-    {file = "lagrange_python-0.1.3-py3-none-any.whl", hash = "sha256:1b2f3eb8d69b1cf193f7cb7cd7110668e8a71244d46d8877377d8b6dad7c502b"},
-    {file = "lagrange_python-0.1.3.tar.gz", hash = "sha256:8e7572c6991dc531243ce222ed12cbb767209c72e46d68a75e490c1552bc2c68"},
+    {file = "lagrange_python-0.1.5-py3-none-any.whl", hash = "sha256:89a682ba8ae90cbae3c6dd8563f45c75affdac0f257df2439c493ba9db5c011e"},
+    {file = "lagrange_python-0.1.5.tar.gz", hash = "sha256:cb48d40b86f26a9bc09b2c97c1304e44ce86d30f548fbadccc491b583b92cb78"},
 ]
 
 [[package]]

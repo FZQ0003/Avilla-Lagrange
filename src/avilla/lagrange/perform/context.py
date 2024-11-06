@@ -1,18 +1,13 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
-from avilla.core.builtins.capability import CoreCapability
-from avilla.core.context import Context
+from avilla.core import CoreCapability, Selector, Context
 from avilla.core.ryanvk.collector.account import AccountCollector
-from avilla.core.selector import Selector
 
 if TYPE_CHECKING:
-    from ..account import LagrangeAccount  # noqa: F401
-    from ..protocol import LagrangeProtocol  # noqa: F401
+    from ..account import LagrangeAccount
+    from ..protocol import LagrangeProtocol
 
 
-# TODO: this is copied from onebot-11, need to edit?
 class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'LagrangeAccount']())._):
     m.namespace = 'avilla.protocol/lagrange::context'
 
@@ -54,24 +49,21 @@ class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'Lagrang
 
     @m.entity(CoreCapability.channel, target='land.group')
     @m.entity(CoreCapability.channel, target='land.group.member')
-    def channel_from_group(self, target: Selector):
-        return target['group']
-
     @m.entity(CoreCapability.guild, target='land.group')
     @m.entity(CoreCapability.guild, target='land.group.member')
-    def guild_from_group(self, target: Selector):
+    def get_group(self, target: Selector):
         return target['group']
 
     @m.entity(CoreCapability.user, target='land.group.member')
-    def user_from_member(self, target: Selector):
+    def get_member(self, target: Selector):
         return target['member']
 
     @m.entity(CoreCapability.user, target='land.friend')
     @m.entity(CoreCapability.channel, target='land.friend')
-    def user_from_friend(self, target: Selector):
+    def get_friend(self, target: Selector):
         return target['friend']
 
     @m.entity(CoreCapability.user, target='land.stranger')
     @m.entity(CoreCapability.channel, target='land.stranger')
-    def user_from_stranger(self, target: Selector):
+    def get_stranger(self, target: Selector):
         return target['stranger']

@@ -12,7 +12,7 @@ from .utils.broadcast import LagrangeRawEvent
 from .utils.magic import avilla_post_event
 
 
-class LagrangeCapability(ApplicationCollector()._):  # noqa
+class LagrangeCapability(ApplicationCollector()._):
     @Fn.complex({TypeOverload(): ['raw_event']})
     async def event_callback(self, raw_event: LgrEvent) -> AvillaEvent | AvillaLifecycleEvent | None:
         ...
@@ -39,6 +39,8 @@ class LagrangeCapability(ApplicationCollector()._):  # noqa
                 #     return  # Do not record again
                 avilla_post_event(self.avilla, maybe_event, LagrangeRawEvent(client, event),
                                   self.avilla.get_protocol(LagrangeProtocol))
+            else:
+                raise NotImplementedError
         except NotImplementedError:
             logger.warning(f'Client {client.uin} received unsupported event: '
                            f'{type(event).__name__}')
