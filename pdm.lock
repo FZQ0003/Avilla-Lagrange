@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3f5c0c7915202bc133b3bfd9a2cd11dcf0bb0e6777d64848ce7e89538fa8eced"
+content_hash = "sha256:3424b01b56fa9a6e45e0012075fbaf08844e10927c8d227cf1ea154ee778402a"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -188,7 +188,7 @@ files = [
 
 [[package]]
 name = "flywheel-fncollector"
-version = "0.2.1"
+version = "0.3.0"
 requires_python = ">=3.9"
 summary = "Add a FnCollector for Ryanvk Flywheel"
 groups = ["default"]
@@ -196,8 +196,8 @@ dependencies = [
     "elaina-flywheel<0.7.0,>=0.6.0",
 ]
 files = [
-    {file = "flywheel_fncollector-0.2.1-py3-none-any.whl", hash = "sha256:fa07f2f2d92ca3c042ff932c705404720f41d736a6c71f3a3bc10a29c554db21"},
-    {file = "flywheel_fncollector-0.2.1.tar.gz", hash = "sha256:876d1bb84542eaa038f05d966460152b835f4c49d6c426a823f5c12c07eecbe8"},
+    {file = "flywheel_fncollector-0.3.0-py3-none-any.whl", hash = "sha256:a4a50cdf67f006642d817023ae57d7259a3cb3d7a7d6af45c07967690599e889"},
+    {file = "flywheel_fncollector-0.3.0.tar.gz", hash = "sha256:9517e1133f1d9491ea61b411c0ca848f3d2b1cc67406d74c86069acf62d25d2e"},
 ]
 
 [[package]]
