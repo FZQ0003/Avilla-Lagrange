@@ -7,25 +7,23 @@ from lagrange.client.client import Client
 from lagrange.client.events.service import ClientOnline, ClientOffline, ServerKick
 from loguru import logger
 
+from ..base import LagrangePerform
 from ...account import LagrangeAccount
 from ...capability import LagrangeCapability
-from ...collector import LagrangeClientCollector
 
 
-class LagrangeEventLifespanPerform((m := LagrangeClientCollector())._):
-    m.namespace = 'avilla.protocol/lagrange::event'
-    m.identify = 'lifespan'
+class LagrangeEventLifespanPerform(LagrangePerform):
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOnline)  # type: ignore
-    async def online(self, raw_event: ClientOnline):
+    @LagrangeCapability.event_callback.collect(raw_event=ClientOnline)
+    async def online(self, raw_event: ClientOnline) -> AccountRegistered:
         account: LagrangeAccount = self.service.account
         client: Client = self.client
         account.status.enabled = True
         logger.info(f'Account {client.uin} online')
         return AccountRegistered(avilla=self.avilla, account=account)
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ClientOffline)  # type: ignore
-    async def offline(self, raw_event: ClientOffline):
+    @LagrangeCapability.event_callback.collect(raw_event=ClientOffline)
+    async def offline(self, raw_event: ClientOffline) -> AccountUnregistered:
         account: LagrangeAccount = self.service.account
         client: Client = self.client
         account.status.enabled = False
@@ -35,8 +33,8 @@ class LagrangeEventLifespanPerform((m := LagrangeClientCollector())._):
         logger.info(f"Account {client.uin} offline, it is {'' if raw_event.recoverable else 'not '}recoverable")
         return AccountUnregistered(avilla=self.avilla, account=account)
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=ServerKick)  # type: ignore
-    async def kicked(self, raw_event: ServerKick):
+    @LagrangeCapability.event_callback.collect(raw_event=ServerKick)
+    async def kicked(self, raw_event: ServerKick) -> AccountUnavailable:
         account: LagrangeAccount = self.service.account
         client: Client = self.client
         account.status.enabled = False

@@ -9,28 +9,26 @@ from lagrange.client.events.friend import FriendMessage
 from lagrange.client.events.group import GroupMessage, GroupRecall
 from loguru import logger
 
+from ..base import LagrangePerform
 from ...account import LagrangeAccount
 from ...capability import LagrangeCapability
-from ...collector import LagrangeClientCollector
 from ...utils.record import MessageRecord
 
 
-class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
-    m.namespace = 'avilla.protocol/lagrange::event'
-    m.identify = 'message'
+class LagrangeEventMessagePerform(LagrangePerform):
 
     async def message_handle(self, context, chain):
         account: LagrangeAccount = self.service.account
-        message = await LagrangeCapability(
-            account.staff.ext({'context': context})
-        ).deserialize_chain(chain)
+        capability = LagrangeCapability.from_self(self)
+        capability.context = context
+        message = await capability.deserialize_chain(chain)
         reply = None
         if i := message.get(Reference):
             reply = i[0].message
             message = message.exclude(Reference)
         return message, reply
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupMessage)  # type: ignore
+    @LagrangeCapability.event_callback.collect(raw_event=GroupMessage)
     async def group(self, raw_event: GroupMessage):
         self.database.insert_user(raw_event.uin, raw_event.uid)
         self.database.insert_msg_record(MessageRecord(
@@ -60,7 +58,7 @@ class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
             ),
         )
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=FriendMessage)  # type: ignore
+    @LagrangeCapability.event_callback.collect(raw_event=FriendMessage)
     async def friend(self, raw_event: FriendMessage):
         self.database.insert_user(raw_event.from_uin, raw_event.from_uid)
         self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
@@ -96,7 +94,7 @@ class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
 
     # TODO: MessageSent == GroupMessage / FriendMessage, but sender == self
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupRecall)  # type: ignore
+    @LagrangeCapability.event_callback.collect(raw_event=GroupRecall)
     async def group_recall(self, raw_event: GroupRecall):
         account: LagrangeAccount = self.service.account
         group: Selector = Selector().land(account.route['land']).group(str(raw_event.grp_id))

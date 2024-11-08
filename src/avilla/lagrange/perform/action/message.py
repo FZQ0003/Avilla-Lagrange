@@ -1,10 +1,8 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-from avilla.core import Context
+from avilla.core import Context, CoreCapability
 from avilla.core.elements import Reference
 from avilla.core.message import Message
-from avilla.core.ryanvk.collector.account import AccountCollector
 from avilla.core.selector import Selector
 from avilla.standard.core.message import MessageRevoke, MessageSend
 from avilla.standard.core.message.event import MessageSent
@@ -12,19 +10,15 @@ from avilla.standard.qq.elements import Forward
 from graia.amnesia.message import MessageChain
 from lagrange import Client
 
+from ..base import LagrangePerform
+from ..compat import compat_collect
 from ...capability import LagrangeCapability
 from ...utils.record import MessageRecord
 
-if TYPE_CHECKING:
-    from ...account import LagrangeAccount  # noqa: F401
-    from ...protocol import LagrangeProtocol  # noqa: F401
 
+class LagrangeMessageActionPerform(LagrangePerform):
 
-class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'LagrangeAccount']())._):
-    m.namespace = 'avilla.protocol/lagrange::action'
-    m.identify = 'message'
-
-    @MessageSend.send.collect(m, target='land.group')
+    @compat_collect(MessageSend.send, target='land.group')  # noqa
     async def send_group_msg(self, target: Selector, message: MessageChain,
                              *, reply: Selector | None = None) -> Selector:
         if message.has(Forward):
@@ -34,7 +28,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
             message.content.insert(0, Reference(reply))
         client: Client = self.account.client
         seq = await client.send_grp_msg(
-            await LagrangeCapability(self.account.staff).serialize_chain(message),  # type: ignore
+            await LagrangeCapability.from_self(self).serialize_chain(message),  # type: ignore
             int(target['group'])
         )
         context = self.account.get_context(target.member(self.account.route['account']))
@@ -53,17 +47,17 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
         )
         return Selector().land(self.account.route['land']).group(target.pattern['group']).message(str(seq))
 
-    @MessageRevoke.revoke.collect(m, target='land.group.message')
+    @compat_collect(MessageRevoke.revoke, target='land.group.message')  # noqa
     async def recall_group_msg(self, target: Selector):
         client: Client = self.account.client
         await client.recall_grp_msg(int(target['group']), int(target['message']))
 
-    # @MessageRevoke.revoke.collect(m, target='land.friend.message')
+    # @compat_collect(MessageRevoke.revoke, target='land.friend.message')
     # async def recall_friend_msg(self, target: Selector):
     #     client: Client = self.account.client
     #     raise NotImplementedError
 
-    @MessageSend.send.collect(m, target='land.friend')
+    @compat_collect(MessageSend.send, target='land.friend')  # noqa
     async def send_friend_msg(self, target: Selector, message: MessageChain,
                               *, reply: Selector | None = None) -> Selector:
         if message.has(Forward):
@@ -72,7 +66,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
         if reply:
             message.content.insert(0, Reference(reply))
         client: Client = self.account.client
-        chain = await LagrangeCapability(self.account.staff).serialize_chain(message)
+        chain = await LagrangeCapability.from_self(self).serialize_chain(message)
         seq = await client.send_friend_msg(
             chain,  # type: ignore
             self.protocol.service.database.get_user(int(target['friend']))[1]
@@ -110,7 +104,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
 
     # TODO: send forward message (not implemented)
 
-    @m.pull('land.group.message', Message)
+    @compat_collect(CoreCapability.pull, target='land.group.message', route=Message)  # noqa
     async def get_group_message(self, message: Selector, route: ...) -> Message:
         client: Client = self.account.client
         messages = await client.get_grp_msg(
@@ -122,7 +116,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
             raise RuntimeError(f"Failed to get message from {message['group']}: {message}")
         result = messages[-1]
         group = Selector().land(self.account.route['land']).group(message['group'])
-        content = await LagrangeCapability(self.account.staff).deserialize_chain(result.msg_chain)  # type: ignore
+        content = await LagrangeCapability.from_self(self).deserialize_chain(result.msg_chain)  # type: ignore
         return Message(
             str(result.seq),
             group,
@@ -131,7 +125,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
             datetime.fromtimestamp(result.time),
         )
 
-    # @m.pull('land.friend.message', Message)
+    # @compat_collect(CoreCapability.pull, target='land.friend.message', route=Message)  # noqa
     # async def get_friend_message(self, message: Selector, route: ...) -> Message:
     #     client: Client = self.account.client
     #     messages = await client.get_friend_msg(
@@ -143,7 +137,7 @@ class LagrangeMessageActionPerform((m := AccountCollector['LagrangeProtocol', 'L
     #         raise RuntimeError(f"Failed to get message from {message['friend']}: {message}")
     #     result = messages[-1]
     #     friend = Selector().land(self.account.route['land']).friend(message['friend'])
-    #     content = await LagrangeCapability(self.account.staff).deserialize_chain(result.msg_chain)
+    #     content = await LagrangeCapability.from_self(self).deserialize_chain(result.msg_chain)
     #     return Message(
     #         str(result.seq),
     #         friend,

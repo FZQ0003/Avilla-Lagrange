@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 from avilla.core import Selector
 from avilla.core.account import AccountInfo
-from avilla.core.ryanvk.staff import Staff
 from lagrange import Client
 from lagrange.info.app import app_list
 from lagrange.utils.sign import sign_provider
@@ -92,27 +91,10 @@ class LagrangeClientService(Service):
                 if uid := friend.uid:  # uid is optional (...)
                     db.insert_user(friend.uin, uid)
 
-    def get_staff_components(self):
-        return {
-            'service': self,
-            'protocol': self.protocol,
-            'client': self.client,
-            'database': self.protocol.service.database,
-            'avilla': self.protocol.avilla
-        }
-
-    def get_staff_artifacts(self):
-        return [self.protocol.artifacts, self.protocol.avilla.global_artifacts]
-
-    @property
-    def staff(self):
-        return Staff(self.get_staff_artifacts(), self.get_staff_components())
-
     async def launch(self, manager: Launart):
         async with self.stage('preparing'):
             # Init account
-            self.init_account()
-            capability = LagrangeCapability(self.staff)
+            capability = LagrangeCapability(self.protocol, self.init_account())
             # lagrange.subscribe
             for a_event in AVAILABLE_EVENTS:
                 self.client.events.subscribe(a_event, capability.handle_event)

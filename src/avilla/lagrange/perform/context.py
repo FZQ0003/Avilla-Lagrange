@@ -1,17 +1,12 @@
-from typing import TYPE_CHECKING
-
 from avilla.core import CoreCapability, Selector, Context
-from avilla.core.ryanvk.collector.account import AccountCollector
 
-if TYPE_CHECKING:
-    from ..account import LagrangeAccount
-    from ..protocol import LagrangeProtocol
+from .base import LagrangePerform
+from .compat import compat_collect
 
 
-class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'LagrangeAccount']())._):
-    m.namespace = 'avilla.protocol/lagrange::context'
+class LagrangeContextPerform(LagrangePerform):
 
-    @m.entity(CoreCapability.get_context, target='land.group')
+    @compat_collect(CoreCapability.get_context, target='land.group')  # noqa
     def get_context_from_group(self, target: Selector, *, via: Selector | None = None):
         return Context(
             self.account,
@@ -21,7 +16,7 @@ class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'Lagrang
             target.member(self.account.route['account']),
         )
 
-    @m.entity(CoreCapability.get_context, target='land.friend')
+    @compat_collect(CoreCapability.get_context, target='land.friend')  # noqa
     def get_context_from_friend(self, target: Selector, *, via: Selector | None = None):
         if via:
             return Context(
@@ -33,11 +28,11 @@ class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'Lagrang
             )
         return Context(self.account, target, self.account.route, target, self.account.route)
 
-    @m.entity(CoreCapability.get_context, target='land.stranger')
+    @compat_collect(CoreCapability.get_context, target='land.stranger')  # noqa
     def get_context_from_stranger(self, target: Selector, *, via: Selector | None = None):
         return Context(self.account, target, self.account.route, target, self.account.route)
 
-    @m.entity(CoreCapability.get_context, target='land.group.member')
+    @compat_collect(CoreCapability.get_context, target='land.group.member')  # noqa
     def get_context_from_member(self, target: Selector, *, via: Selector | None = None):
         return Context(
             self.account,
@@ -47,23 +42,23 @@ class LagrangeContextPerform((m := AccountCollector['LagrangeProtocol', 'Lagrang
             target.into(f"~.member({self.account.route['account']})"),
         )
 
-    @m.entity(CoreCapability.channel, target='land.group')
-    @m.entity(CoreCapability.channel, target='land.group.member')
-    @m.entity(CoreCapability.guild, target='land.group')
-    @m.entity(CoreCapability.guild, target='land.group.member')
+    @compat_collect(CoreCapability.channel, target='land.group')  # noqa
+    @compat_collect(CoreCapability.channel, target='land.group.member')  # noqa
+    @compat_collect(CoreCapability.guild, target='land.group')  # noqa
+    @compat_collect(CoreCapability.guild, target='land.group.member')  # noqa
     def get_group(self, target: Selector):
         return target['group']
 
-    @m.entity(CoreCapability.user, target='land.group.member')
+    @compat_collect(CoreCapability.user, target='land.group.member')  # noqa
     def get_member(self, target: Selector):
         return target['member']
 
-    @m.entity(CoreCapability.user, target='land.friend')
-    @m.entity(CoreCapability.channel, target='land.friend')
+    @compat_collect(CoreCapability.user, target='land.friend')  # noqa
+    @compat_collect(CoreCapability.channel, target='land.friend')  # noqa
     def get_friend(self, target: Selector):
         return target['friend']
 
-    @m.entity(CoreCapability.user, target='land.stranger')
-    @m.entity(CoreCapability.channel, target='land.stranger')
+    @compat_collect(CoreCapability.user, target='land.stranger')  # noqa
+    @compat_collect(CoreCapability.channel, target='land.stranger')  # noqa
     def get_stranger(self, target: Selector):
         return target['stranger']
