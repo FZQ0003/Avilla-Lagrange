@@ -3,6 +3,7 @@ from typing import Concatenate, TypeVar, TYPE_CHECKING
 
 from avilla.core.ryanvk.collector.account import AccountBasedPerformTemplate, AccountCollector
 from flywheel.typing import P, R
+from flywheel_extras.utils import get_method_class
 from graia.ryanvk import Fn
 
 from .base import LagrangePerform
@@ -19,8 +20,10 @@ m.namespace = 'avilla.protocol/lagrange::compat'
 
 def compat_collect(fn: Fn, **overload_settings):
     def wrapper(func: Callable[Concatenate[T_Perform, P], R]) -> Callable[Concatenate[T_Perform, P], R]:
+        cls = _ if (_ := get_method_class(func)) and issubclass(_, LagrangePerform) else LagrangePerform
+
         def real_entity(self: AccountBasedPerformTemplate, *args: P.args, **kwargs: P.kwargs) -> R:
-            return func(LagrangePerform(self.protocol, self.account), *args, **kwargs)  # type: ignore
+            return func(cls(self.protocol, self.account), *args, **kwargs)  # type: ignore
 
         fn.collect(m, **overload_settings)(real_entity)
         return func

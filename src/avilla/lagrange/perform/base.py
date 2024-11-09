@@ -21,14 +21,17 @@ class LagrangePerform(FnCollection):
     client: Client
     context: Context | None = None
 
-    def __init__(self, protocol: 'LagrangeProtocol', account: 'LagrangeAccount'):
+    def __init__(self, protocol: 'LagrangeProtocol', account: 'LagrangeAccount',
+                 context: Context | None = None):
         self.avilla = protocol.avilla
         self.protocol = protocol
         self.database = protocol.service.database
         self.service = account.service
         self.account = account
         self.client = account.client
+        if context:
+            self.context = context
 
     @classmethod
     def from_self(cls, self: 'LagrangePerform') -> Self:
-        return cls(self.protocol, self.account)
+        return cls(self.protocol, self.account, self.context)
