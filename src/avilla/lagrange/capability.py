@@ -14,15 +14,15 @@ from .utils.magic import avilla_post_event
 
 
 class LagrangeCapability(LagrangePerform):
-    @FnCollector.set(TypeOverload('raw_event'), as_default=True)
+    @FnCollector.set(TypeOverload('raw_event'))
     async def event_callback(self, raw_event: LgrEvent) -> AvillaEvent | AvillaLifecycleEvent | None:
         ...
 
-    @FnCollector.set(TypeOverload('raw_element'), as_default=True)
+    @FnCollector.set(TypeOverload('raw_element'))
     async def deserialize_element(self, raw_element: LgrElement) -> Element | None:
         ...
 
-    @FnCollector.set(TypeOverload('element'), as_default=True)
+    @FnCollector.set(TypeOverload('element'))
     async def serialize_element(self, element: Element) -> LgrElement | None:
         ...
 

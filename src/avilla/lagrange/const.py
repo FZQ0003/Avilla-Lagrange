@@ -1,4 +1,4 @@
-from avilla.core import Land, Platform, Abstract
+from avilla.core import Land, Platform, Abstract, Selector
 
 # From Lagrange.Core
 SIGN_URL = 'https://sign.lagrangecore.org/api/sign/25765'
@@ -24,3 +24,4 @@ PLATFORM = Platform(
         humanized_name='Lagrange-python for Avilla',
     ),
 )
+LAND_SELECTOR = Selector().land(LAND)

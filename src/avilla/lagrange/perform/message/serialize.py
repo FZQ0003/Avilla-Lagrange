@@ -45,7 +45,6 @@ from ..base import LagrangePerform
 from ...capability import LagrangeCapability
 from ...const import TEXT_AT_ALL
 from ...resource import LagrangeResource
-from ...service import LagrangeDatabase
 
 
 class LagrangeMessageSerializePerform(LagrangePerform):
@@ -85,8 +84,7 @@ class LagrangeMessageSerializePerform(LagrangePerform):
     @LagrangeCapability.serialize_element.collect(element=Notice)
     async def notice(self, element: Notice) -> LgrAt:
         uin = int(element.target['member'])
-        db: LagrangeDatabase = self.protocol.service.database
-        return LgrAt(uin=uin, uid=db.get_user(uin)[1], text=f"{element.display or ''}")
+        return LgrAt(uin=uin, uid=self.database.get_user(uin)[1], text=f"{element.display or ''}")
 
     @LagrangeCapability.serialize_element.collect(element=NoticeAll)
     async def notice_all(self, element: NoticeAll) -> LgrAtAll:
@@ -99,8 +97,7 @@ class LagrangeMessageSerializePerform(LagrangePerform):
             friend_uin = int(element.message.pattern.get('member', 0))
         else:
             friend_uin = int(element.message.pattern.get('friend', 0))
-        db: LagrangeDatabase = self.protocol.service.database
-        record = db.get_msg_record(
+        record = self.database.get_msg_record(
             msg_id=int(element.message['message']),
             seq=int(element.message['message']),
             friend_uin=friend_uin,
@@ -110,7 +107,7 @@ class LagrangeMessageSerializePerform(LagrangePerform):
             seq=record.seq,
             uin=record.friend_uin,
             timestamp=record.time,
-            uid=db.get_user(record.friend_uin)[1],
+            uid=self.database.get_user(record.friend_uin)[1],
             msg=record.msg
         )
 

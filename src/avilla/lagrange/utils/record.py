@@ -1,7 +1,7 @@
 import time
 from dataclasses import dataclass, field
 
-from ..types import Element
+from lagrange.client.message.types import Element
 
 
 @dataclass

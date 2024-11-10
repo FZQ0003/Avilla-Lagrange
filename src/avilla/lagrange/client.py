@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-from avilla.core import Selector
 from avilla.core.account import AccountInfo
 from lagrange import Client
 from lagrange.info.app import app_list
@@ -10,7 +9,7 @@ from launart.status import Phase
 
 from .account import LagrangeAccount
 from .capability import LagrangeCapability
-from .const import LAND, PLATFORM
+from .const import PLATFORM, LAND_SELECTOR
 from .types import AVAILABLE_EVENTS
 
 if TYPE_CHECKING:
@@ -49,7 +48,7 @@ class LagrangeClientService(Service):
     def init_account(self) -> LagrangeAccount:
         if hasattr(self, 'account'):
             return self.account
-        route: Selector = Selector().land(LAND.name).account(str(self.client.uin))
+        route = LAND_SELECTOR.account(str(self.client.uin))
         account = LagrangeAccount(route=route, avilla=self.protocol.avilla)
         self.account = account
         # Add to avilla

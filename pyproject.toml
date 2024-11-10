@@ -24,6 +24,7 @@ distribution = true
 
 [tool.pdm.build]
 includes = ["src/avilla/lagrange/"]
+excludes = ["**/*.md"]
 
 [tool.pdm.dev-dependencies]
 test = [
