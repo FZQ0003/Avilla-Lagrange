@@ -1,6 +1,7 @@
+import asyncio
 import os
 
-from avilla.core import Avilla, Context, MessageReceived
+from avilla.core import Avilla, Context, MessageReceived, MessageRevoke
 from avilla.standard.core.account import AccountRegistered
 from lagrange import Client as LgrClient
 from lagrange.client.events import BaseEvent
@@ -26,7 +27,10 @@ avilla.apply_protocols(LagrangeProtocol(global_config).configure(config))
 async def on_message_received(ctx: Context, event: MessageReceived,
                               raw_event: BaseEvent, raw_client: LgrClient):
     logger.debug(f'Raw: [{raw_client.uin}] -> {raw_event}')
-    await ctx.scene.send_message('Hello, Avilla!', reply=event.message)
+    sent = await ctx.scene.send_message('Hello, Avilla!', reply=event.message)
+    await asyncio.sleep(5)
+    if ctx.scene.follows('::group'):
+        await ctx[MessageRevoke.revoke](sent)  # noqa
 
 
 @avilla.listen(AccountRegistered)

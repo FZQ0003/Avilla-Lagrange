@@ -1,109 +1,110 @@
 from datetime import datetime
 
-from avilla.core.context import Context
+from avilla.core import Context, Message
 from avilla.core.elements import Reference
-from avilla.core.message import Message
-from avilla.core.selector import Selector
-from avilla.standard.core.message import MessageReceived, MessageRevoked
-from lagrange.client.events.friend import FriendMessage
+from avilla.standard.core.message import MessageReceived, MessageRevoked, MessageSent
+from lagrange.client.events.friend import FriendMessage, FriendRecall
 from lagrange.client.events.group import GroupMessage, GroupRecall
 from loguru import logger
 
-from ...account import LagrangeAccount
+from ..base import LagrangePerform
 from ...capability import LagrangeCapability
-from ...collector import LagrangeClientCollector
+from ...const import LAND_SELECTOR
+from ...typing import RawMessage
 from ...utils.record import MessageRecord
 
 
-class LagrangeEventMessagePerform((m := LagrangeClientCollector())._):
-    m.namespace = 'avilla.protocol/lagrange::event'
-    m.identify = 'message'
+class LagrangeEventMessagePerform(LagrangePerform):
 
-    async def message_handle(self, context, chain):
-        account: LagrangeAccount = self.service.account
-        message = await LagrangeCapability(
-            account.staff.ext({'context': context})
-        ).deserialize_chain(chain)
+    async def message_handle(self, context: Context, raw: RawMessage) -> Message:
+        content = await LagrangeCapability(
+            self.protocol, self.account, context
+        ).deserialize_chain(raw.msg_chain)
         reply = None
-        if i := message.get(Reference):
-            reply = i[0].message
-            message = message.exclude(Reference)
-        return message, reply
+        if refs := content.get(Reference, 1):
+            reply = refs[0].message
+            content = content.exclude(Reference)
+        if time_int := (getattr(raw, 'timestamp', 0) or getattr(raw, 'time', 0)):
+            timestamp = datetime.fromtimestamp(time_int)
+        else:
+            timestamp = datetime.now()
+        return Message(
+            id=str(raw.seq),  # message_seq
+            scene=context.scene,
+            sender=context.client,
+            content=content,
+            time=timestamp,
+            reply=reply
+        )
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupMessage)  # type: ignore
-    async def group(self, raw_event: GroupMessage):
+    @LagrangeCapability.event_callback.collect(raw_event=GroupMessage)
+    async def group_message(self, raw_event: GroupMessage):
         self.database.insert_user(raw_event.uin, raw_event.uid)
         self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.uin,
             seq=raw_event.seq,
-            chain=raw_event.msg_chain,  # type: ignore
+            msg_chain=raw_event.msg_chain,  # type: ignore
             group_uin=raw_event.grp_id,
+            msg_id=raw_event.rand,
             time=raw_event.time
         ))
-        if raw_event.uin == self.client.uin and not self.service.config.allow_self_msg:
-            logger.info(f'Ignore: {raw_event}')
-            return
-        account: LagrangeAccount = self.service.account
-        group: Selector = Selector().land(account.route['land']).group(str(raw_event.grp_id))
-        member: Selector = group.member(str(raw_event.uin))
-        context = Context(account, member, group, group, group.member(account.route['account']))
-        message, reply = await self.message_handle(context, raw_event.msg_chain)
-        return MessageReceived(
-            context,
-            Message(
-                id=str(raw_event.seq),  # message_seq
-                scene=group,
-                sender=member,
-                content=message,
-                time=datetime.fromtimestamp(raw_event.time),
-                reply=reply,
-            ),
+        context = self.account.get_context(
+            LAND_SELECTOR.group(str(raw_event.grp_id)).member(str(raw_event.uin))
         )
+        message = await self.message_handle(context, raw_event)
+        if raw_event.uin == self.client.uin:
+            return MessageSent(context, message, self.account)
+        return MessageReceived(context, message)
 
-    @m.entity(LagrangeCapability.event_callback, raw_event=FriendMessage)  # type: ignore
-    async def friend(self, raw_event: FriendMessage):
+    @LagrangeCapability.event_callback.collect(raw_event=FriendMessage)
+    async def friend_message(self, raw_event: FriendMessage):
         self.database.insert_user(raw_event.from_uin, raw_event.from_uid)
-        self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
         self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.from_uin,
             seq=raw_event.seq,
-            chain=raw_event.msg_chain,  # type: ignore
+            msg_chain=raw_event.msg_chain,
             target_uin=raw_event.to_uin,
             msg_id=raw_event.msg_id,
             time=raw_event.timestamp
         ))
-        if raw_event.from_uin == self.client.uin and not self.service.config.allow_self_msg:
-            logger.info(f'Ignore: {raw_event}')
-            return
-        account: LagrangeAccount = self.service.account
-        land: Selector = Selector().land(account.route['land'])
-        client: Selector = land.friend(str(raw_event.from_uin))
-        endpoint: Selector = land.friend(str(raw_event.to_uin))
-        # message from client, client == scene
-        context = Context(account, client, endpoint, client, account.route)
-        message, reply = await self.message_handle(context, raw_event.msg_chain)
-        return MessageReceived(
-            context,
-            Message(
-                id=str(raw_event.msg_id),
-                scene=client,
-                sender=client,
-                content=message,
-                time=datetime.fromtimestamp(raw_event.timestamp),
-                reply=reply,
-            ),
+        if raw_event.to_uin == self.client.uin:
+            context = self.account.get_context(LAND_SELECTOR.friend(str(raw_event.from_uin)))
+        else:
+            logger.warning(f'Message target is not self: {raw_event}')
+            self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
+            context = self.account.get_context(
+                LAND_SELECTOR.friend(str(raw_event.to_uin)),
+                via=LAND_SELECTOR.friend(str(raw_event.from_uin))
+            )
+        message = await self.message_handle(context, raw_event)
+        if raw_event.from_uin == self.client.uin:
+            return MessageSent(context, message, self.account)
+        return MessageReceived(context, message)
+
+    @LagrangeCapability.event_callback.collect(raw_event=GroupRecall)
+    async def group_recall(self, raw_event: GroupRecall):
+        # Operator is unknown, use sender as client instead
+        group = LAND_SELECTOR.group(str(raw_event.grp_id))
+        context = self.account.get_context(
+            group.message(str(raw_event.seq)),
+            via=group.member(str(self.database.get_user(raw_event.uid)[0]))
+        )
+        return MessageRevoked(
+            context=context,
+            message=context.endpoint,
+            operator=context.client,
+            sender=context.client
         )
 
-    # TODO: MessageSent == GroupMessage / FriendMessage, but sender == self
-
-    @m.entity(LagrangeCapability.event_callback, raw_event=GroupRecall)  # type: ignore
-    async def group_recall(self, raw_event: GroupRecall):
-        account: LagrangeAccount = self.service.account
-        group: Selector = Selector().land(account.route['land']).group(str(raw_event.grp_id))
-        sender = group.member(str(self.database.get_user(raw_event.uid)[0]))
-        message = group.message(str(raw_event.seq))
-        operator = sender  # operator is unknown, use sender instead
-        context = Context(account, operator, message, group, group.member(account.route['account']))
-        return MessageRevoked(context=context, message=message, operator=operator, sender=sender)
-
-    # TODO: FriendRecall (not implemented) and other possible message events
+    @LagrangeCapability.event_callback.collect(raw_event=FriendRecall)
+    async def friend_recall(self, raw_event: FriendRecall):
+        # Operator is sender
+        context = self.account.get_context(
+            LAND_SELECTOR.friend(str(raw_event.to_uin)).message(str(raw_event.seq))
+        )
+        return MessageRevoked(
+            context=context,
+            message=context.endpoint,
+            operator=context.client,
+            sender=context.client
+        )

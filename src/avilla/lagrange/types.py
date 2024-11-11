@@ -1,9 +1,10 @@
 from typing import Union, TypeAlias
 
-from lagrange.client.events.service import (
-    ClientOnline,
-    ClientOffline,
-    ServerKick,
+from lagrange.client.events.friend import (
+    FriendMessage,
+    # FriendRecall,
+    # FriendRequest,
+    # FriendNudge,
 )
 from lagrange.client.events.group import (
     GroupMessage,
@@ -21,11 +22,10 @@ from lagrange.client.events.group import (
     # GroupInvite,
     # GroupMemberJoinedByInvite,
 )
-from lagrange.client.events.friend import (
-    FriendMessage,
-    # FriendRecall,
-    # FriendRequest,
-    # FriendNudge,
+from lagrange.client.events.service import (
+    ClientOnline,
+    ClientOffline,
+    ServerKick,
 )
 from lagrange.client.message.elems import (
     Text,

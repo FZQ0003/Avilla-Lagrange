@@ -10,6 +10,7 @@ from lagrange.info import DeviceInfo, SigInfo
 
 from .client import LagrangeClientService
 from .const import SIGN_SEQ, SIGN_URL
+from .perform import import_performs
 from .service import LagrangeService
 from .utils.broadcast import AvillaLagrangeStopDispatcher
 
@@ -28,7 +29,6 @@ class LagrangeConfig(ProtocolConfig):
     sig_info_path: os.PathLike[str] | str = './sig.bin'
     device_info: DeviceInfo | None = None
     sig_info: SigInfo | None = None
-    allow_self_msg: bool = False
 
     def __post_init__(self):
         # Check if info is pre-defined (use temp path instead)
@@ -36,7 +36,7 @@ class LagrangeConfig(ProtocolConfig):
             self.device_info_path = ''
         if self.sig_info:
             self.sig_info_path = ''
-    
+
     def read_info(self, force: bool = False) -> tuple[DeviceInfo, SigInfo]:
         if self.device_info and not force:
             ...
@@ -55,7 +55,7 @@ class LagrangeConfig(ProtocolConfig):
         else:
             self.sig_info = SigInfo.new(SIGN_SEQ)
         return self.device_info, self.sig_info
-    
+
     def save_info(self) -> None:
         if self.device_info and not Path(self.device_info_path).is_dir():
             with open(self.device_info_path, 'wb') as f:
@@ -65,28 +65,12 @@ class LagrangeConfig(ProtocolConfig):
                 f.write(self.sig_info.dump())
 
 
-def _import_performs():
-    from . import logger  # noqa: F401
-    from .perform import context  # noqa: F401
-    from .perform.action import message  # noqa: F401
-    from .perform.event import lifespan, message  # noqa: F401
-    from .perform.message import deserialize, serialize  # noqa: F401
-
-
 class LagrangeProtocol(BaseProtocol):
     service: LagrangeService
 
-    _import_performs()
-    artifacts = {
-        **merge(
-            ref('avilla.protocol/lagrange::action', 'message'),
-            ref('avilla.protocol/lagrange::event', 'lifespan'),
-            ref('avilla.protocol/lagrange::event', 'message'),
-            ref('avilla.protocol/lagrange::message', 'deserialize'),
-            ref('avilla.protocol/lagrange::message', 'serialize'),
-            ref('avilla.protocol/lagrange::context'),
-        )
-    }
+    from . import logger  # noqa: F401
+    import_performs()
+    artifacts = {**merge(ref('avilla.protocol/lagrange::compat'))}
 
     def __init__(self, config: LagrangeGlobalConfig = LagrangeGlobalConfig()):
         self.service = LagrangeService(self, config)

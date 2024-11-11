@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6a6ffe6b60159c6e05a562c6dd5406201556d13e988434f1285fa03ca1135d7a"
+content_hash = "sha256:c276949945ecac0e50cec20e1f0a10ab9e59c1ca936b5254548470b46d226aa6"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -30,13 +30,13 @@ files = [
 
 [[package]]
 name = "avilla-standard-qq"
-version = "1.0.0a21"
+version = "1.0.0a22"
 requires_python = ">=3.9"
 summary = ""
 groups = ["default"]
 files = [
-    {file = "avilla_standard_qq-1.0.0a21-py3-none-any.whl", hash = "sha256:15c54cf774f6ef774d53d14fbd3d35f6994cb5c95cbfc543dd8bc9f9609983cc"},
-    {file = "avilla_standard_qq-1.0.0a21.tar.gz", hash = "sha256:2051429f3dd71a44a464b5e6f06e2bf8087597af77b088bd570dea38dc12fc13"},
+    {file = "avilla_standard_qq-1.0.0a22-py3-none-any.whl", hash = "sha256:6294423a929dc7865368bf4e06c0a644975e912be46f52d9c6c6c3f2cd90bff8"},
+    {file = "avilla_standard_qq-1.0.0a22.tar.gz", hash = "sha256:8d14ad06b98046ff2e16ca939a662d48a19ccfc44ec4c2beed212aaf7712c7ab"},
 ]
 
 [[package]]
@@ -161,6 +161,20 @@ files = [
 ]
 
 [[package]]
+name = "elaina-flywheel"
+version = "0.6.0"
+requires_python = ">=3.9"
+summary = ""
+groups = ["default"]
+dependencies = [
+    "typing-extensions>=4.10.0",
+]
+files = [
+    {file = "elaina_flywheel-0.6.0-py3-none-any.whl", hash = "sha256:d01ff36ba61308c21ff239a709fbaa28288f073a7c8dfe0d993a74193ce48e23"},
+    {file = "elaina_flywheel-0.6.0.tar.gz", hash = "sha256:dbc072ad7eeb250df35c638e5365de037f134965bbe374bbeefbc53f18b5c55a"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 requires_python = ">=3.7"
@@ -170,6 +184,20 @@ marker = "python_version < \"3.11\""
 files = [
     {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
     {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
+]
+
+[[package]]
+name = "flywheel-fncollector"
+version = "0.3.2"
+requires_python = ">=3.9"
+summary = "Add a FnCollector for Ryanvk Flywheel"
+groups = ["default"]
+dependencies = [
+    "elaina-flywheel<0.7.0,>=0.6.0",
+]
+files = [
+    {file = "flywheel_fncollector-0.3.2-py3-none-any.whl", hash = "sha256:394b2835626e043d0eb756463a3cd46fa094d28f9d43c65926a3183841065854"},
+    {file = "flywheel_fncollector-0.3.2.tar.gz", hash = "sha256:54497c117aac61716bbe3cafa7c31b94e033c8b23e44a141a0d273b87404263e"},
 ]
 
 [[package]]

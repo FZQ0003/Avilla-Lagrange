@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from avilla.core import BaseAccount
@@ -14,16 +15,15 @@ if TYPE_CHECKING:
 class LagrangeAccount(BaseAccount):
     status: AccountStatus = field(default_factory=AccountStatus)
 
-    # Note: Do NOT use these properties for performance. Use ClientService instead.
-    @property
+    @cached_property
     def protocol(self) -> 'LagrangeProtocol':
-        return self.info.protocol  # noqa  # pyright: ignore [reportReturnType]
+        return self.info.protocol  # type: ignore
 
-    @property
+    @cached_property
     def service(self) -> 'LagrangeClientService':
         return self.protocol.service.get_service(int(self.route['account']))
 
-    @property
+    @cached_property
     def client(self) -> Client:
         return self.service.client
 

@@ -19,7 +19,7 @@ class LagrangeDatabase(Database):
             Table({'uin': int, 'uid': str}, 'user_id', 'uin'),
             Table(MessageRecord, 'message_record', 'msg_id')
         ))
-    
+
     def get_user(self, uin_or_uid: int | str) -> tuple[int, str]:
         table = self._tables[0]
         if isinstance(uin_or_uid, int):
