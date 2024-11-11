@@ -15,6 +15,8 @@ class LagrangeContextPerform(LagrangePerform):
     # Use `land.account` as self for common chats, and `land.group.member` for groups.
 
     @compat_collect(CoreCapability.get_context, target='land.group')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group', via='land.group.member')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group', via='land.account')  # noqa
     def get_context_from_group(self, target: Selector, *, via: Selector | None = None):
         # self == land.group.member
         # via => Context(scene=target, client=via, endpoint=scene)
@@ -22,13 +24,15 @@ class LagrangeContextPerform(LagrangePerform):
         context_self = target.member(self.account.route['account'])
         return Context(
             self.account,
-            via or target,
+            target.member(via.last_value) if via else target,
             target if via else context_self,
             target,
             context_self
         )
 
     @compat_collect(CoreCapability.get_context, target='land.group.member')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.member', via='land.group.member')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.member', via='land.account')  # noqa
     def get_context_from_member(self, target: Selector, *, via: Selector | None = None):
         # self == land.group.member
         # via => notice => Context(scene=land.group, client=via, endpoint=target)
@@ -36,15 +40,17 @@ class LagrangeContextPerform(LagrangePerform):
         context_scene = target.into('::group')
         return Context(
             self.account,
-            via or target,
+            target.member(via.last_value) if via else target,
             target if via else context_scene,
             context_scene,
             context_scene.member(self.account.route['account'])
         )
 
     @compat_collect(CoreCapability.get_context, target='land.friend')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.friend', via='land.friend')  # noqa
     @compat_collect(CoreCapability.get_context, target='land.friend', via='land.account')  # noqa
     @compat_collect(CoreCapability.get_context, target='land.stranger')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.stranger', via='land.account')  # noqa
     def get_context_from_private(self, target: Selector, *, via: Selector | None = None):
         # self == land.account
         # If via == land.account, then scene == target
@@ -67,14 +73,20 @@ class LagrangeContextPerform(LagrangePerform):
         raise NotImplementedError('The scene of this message is unknown')
 
     @compat_collect(CoreCapability.get_context, target='land.group.message')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.message', via='land.group.member')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.message', via='land.account')  # noqa
     @compat_collect(CoreCapability.get_context, target='land.friend.message')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.friend.message', via='land.friend')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.friend.message', via='land.account')  # noqa
     @compat_collect(CoreCapability.get_context, target='land.stranger.message')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.stranger.message', via='land.account')  # noqa
     def get_context_from_scene_message(self, target: Selector, *, via: Selector | None = None):
         # Same as get_context_from_message, but scene can be extracted from target
         context_scene = Selector({_k: _v for _k, _v in target.items() if _k != 'message'})
         return Context(
             self.account,
-            via or context_scene,
+            (context_scene.member(via.last_value) if context_scene.last_key == 'group' else via)
+            if via else context_scene,
             target,
             context_scene,
             context_scene.member(self.account.route['account'])
@@ -82,12 +94,14 @@ class LagrangeContextPerform(LagrangePerform):
         )
 
     @compat_collect(CoreCapability.get_context, target='land.group.member.message')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.member.message', via='land.group.member')  # noqa
+    @compat_collect(CoreCapability.get_context, target='land.group.member.message', via='land.account')  # noqa
     def get_context_from_group_member_message(self, target: Selector, *, via: Selector | None = None):
         # DO NOT USE THIS FUNCTION, TARGET HERE IS INVALID
         context_scene = target.into('::group')
         return Context(
             self.account,
-            via or target.into('::group.member'),
+            context_scene.member(via.last_value) if via else target.into('::group.member'),
             Selector({_k: _v for _k, _v in target.items() if _k != 'member'}),
             context_scene,
             context_scene.member(self.account.route['account'])

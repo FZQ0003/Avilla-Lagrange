@@ -8,25 +8,24 @@ from lagrange.client.message.types import Element
 class MessageRecord:
     friend_uin: int
     seq: int
-    chain: list[Element]
+    msg_chain: list[Element]
     group_uin: int = 0
     target_uin: int = 0  # to record sent message
     msg_id: int = 0
     time: int = field(default_factory=lambda: int(time.time()))
 
     def __post_init__(self):
+        # Only generate for messages with no msg_id / rand
         if not self.msg_id:
-            # Calculate msg_id (random in core)
             if self.group_uin:
                 self.msg_id = hash((self.group_uin, self.seq))
             else:
                 # Seq here may vary for different accounts and may not be unique
-                # Only generate for friend messages with no id
                 self.msg_id = hash((self.friend_uin, self.seq))
 
     @property
     def msg(self) -> str:
-        return ''.join(getattr(_, 'text', '') or _.display for _ in self.chain)
+        return ''.join(getattr(_, 'text', '') or _.display for _ in self.msg_chain)
 
     # TODO: FriendInfo GroupMemberInfo MessageHash
 

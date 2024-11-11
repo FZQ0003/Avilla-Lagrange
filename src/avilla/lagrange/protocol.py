@@ -29,7 +29,6 @@ class LagrangeConfig(ProtocolConfig):
     sig_info_path: os.PathLike[str] | str = './sig.bin'
     device_info: DeviceInfo | None = None
     sig_info: SigInfo | None = None
-    allow_self_msg: bool = False
 
     def __post_init__(self):
         # Check if info is pre-defined (use temp path instead)

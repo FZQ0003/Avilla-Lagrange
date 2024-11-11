@@ -1,12 +1,10 @@
 from datetime import datetime
 
-from avilla.core import Context, CoreCapability, Message, Selector
+from avilla.core import Context, Message, Selector
 from avilla.core.elements import Reference
-from avilla.standard.core.message import MessageRevoke, MessageSend
-from avilla.standard.core.message.event import MessageSent
+from avilla.standard.core.message import MessageRevoke, MessageSend, MessageSent
 from avilla.standard.qq.elements import Forward
 from graia.amnesia.message import MessageChain
-from lagrange import Client
 
 from ..base import LagrangePerform
 from ..compat import compat_collect
@@ -38,20 +36,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
         context = self.account.get_context(target.member(self.account.route['account']))
         raw, reply = await self.message_handle(context, message, reply)
         seq = await self.client.send_grp_msg(raw, int(target['group']))  # type: ignore
-        self.protocol.post_event(
-            MessageSent(
-                context,
-                Message(
-                    id=str(seq),  # no msg_id
-                    scene=target,
-                    sender=context.client,
-                    content=message.exclude(Reference),
-                    time=datetime.now(),
-                    reply=reply
-                ),
-                self.account
-            )
-        )
+        # No need to post event
         return target.message(str(seq))
 
     @compat_collect(MessageSend.send, target='land.friend')  # noqa
@@ -65,11 +50,11 @@ class LagrangeMessageActionPerform(LagrangePerform):
             raw,  # type: ignore
             self.database.get_user(int(target['friend']))[1]
         )
-        # Manually insert into Database (lagrange-python will not record this)
+        # Manually insert into database & post event (lagrange-python will not record this)
         record = MessageRecord(
             friend_uin=self.client.uin,
             seq=seq,
-            chain=raw,  # type: ignore
+            msg_chain=raw,  # type: ignore
             target_uin=int(target['friend']),
             msg_id=0  # TODO: msg_id
         )
@@ -78,7 +63,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
             MessageSent(
                 context,
                 Message(
-                    id=str(record.msg_id),  # TODO: msg_id
+                    id=str(record.seq),
                     scene=target,
                     sender=context.client,
                     content=message,
@@ -93,8 +78,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
     @compat_collect(MessageRevoke.revoke, target='land.group.message')  # noqa
     async def recall_group_msg(self, target: Selector):
         await self.client.recall_grp_msg(int(target['group']), int(target['message']))
-        context = self.account.get_context(target.member(self.account.route['account']))
-        raise NotImplementedError('Recall successfully, but event not implemented')
+        # No need to post event
 
     @compat_collect(MessageRevoke.revoke, target='land.friend.message')  # noqa
     async def recall_friend_msg(self, target: Selector):
@@ -103,46 +87,3 @@ class LagrangeMessageActionPerform(LagrangePerform):
     # TODO: send forward message (not implemented)
     def send_group_forward_msg(self, target: Selector, forward: Forward):
         raise NotImplementedError
-
-    # TODO
-    @compat_collect(CoreCapability.pull, target='land.group.message', route=Message)  # noqa
-    async def get_group_message(self, message: Selector, route: ...) -> Message:
-        client: Client = self.account.client
-        messages = await client.get_grp_msg(
-            int(message['group']),
-            int(message['message']),
-            filter_deleted_msg=False
-        )
-        if len(messages) < 1:
-            raise RuntimeError(f"Failed to get message from {message['group']}: {message}")
-        result = messages[-1]
-        group = Selector().land(self.account.route['land']).group(message['group'])
-        content = await LagrangeCapability.from_self(self).deserialize_chain(result.msg_chain)  # type: ignore
-        return Message(
-            str(result.seq),
-            group,
-            group.member(str(result.uin)),
-            content,
-            datetime.fromtimestamp(result.time),
-        )
-
-    # @compat_collect(CoreCapability.pull, target='land.friend.message', route=Message)  # noqa
-    # async def get_friend_message(self, message: Selector, route: ...) -> Message:
-    #     client: Client = self.account.client
-    #     messages = await client.get_friend_msg(
-    #         int(message['friend']),
-    #         int(message['message']),
-    #         filter_deleted_msg=False
-    #     )
-    #     if len(messages) < 1:
-    #         raise RuntimeError(f"Failed to get message from {message['friend']}: {message}")
-    #     result = messages[-1]
-    #     friend = Selector().land(self.account.route['land']).friend(message['friend'])
-    #     content = await LagrangeCapability.from_self(self).deserialize_chain(result.msg_chain)
-    #     return Message(
-    #         str(result.seq),
-    #         friend,
-    #         friend,
-    #         content,
-    #         datetime.fromtimestamp(result.timestamp),
-    #     )
