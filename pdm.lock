@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3424b01b56fa9a6e45e0012075fbaf08844e10927c8d227cf1ea154ee778402a"
+content_hash = "sha256:c276949945ecac0e50cec20e1f0a10ab9e59c1ca936b5254548470b46d226aa6"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -30,13 +30,13 @@ files = [
 
 [[package]]
 name = "avilla-standard-qq"
-version = "1.0.0a21"
+version = "1.0.0a22"
 requires_python = ">=3.9"
 summary = ""
 groups = ["default"]
 files = [
-    {file = "avilla_standard_qq-1.0.0a21-py3-none-any.whl", hash = "sha256:15c54cf774f6ef774d53d14fbd3d35f6994cb5c95cbfc543dd8bc9f9609983cc"},
-    {file = "avilla_standard_qq-1.0.0a21.tar.gz", hash = "sha256:2051429f3dd71a44a464b5e6f06e2bf8087597af77b088bd570dea38dc12fc13"},
+    {file = "avilla_standard_qq-1.0.0a22-py3-none-any.whl", hash = "sha256:6294423a929dc7865368bf4e06c0a644975e912be46f52d9c6c6c3f2cd90bff8"},
+    {file = "avilla_standard_qq-1.0.0a22.tar.gz", hash = "sha256:8d14ad06b98046ff2e16ca939a662d48a19ccfc44ec4c2beed212aaf7712c7ab"},
 ]
 
 [[package]]
@@ -188,7 +188,7 @@ files = [
 
 [[package]]
 name = "flywheel-fncollector"
-version = "0.3.0"
+version = "0.3.2"
 requires_python = ">=3.9"
 summary = "Add a FnCollector for Ryanvk Flywheel"
 groups = ["default"]
@@ -196,8 +196,8 @@ dependencies = [
     "elaina-flywheel<0.7.0,>=0.6.0",
 ]
 files = [
-    {file = "flywheel_fncollector-0.3.0-py3-none-any.whl", hash = "sha256:a4a50cdf67f006642d817023ae57d7259a3cb3d7a7d6af45c07967690599e889"},
-    {file = "flywheel_fncollector-0.3.0.tar.gz", hash = "sha256:9517e1133f1d9491ea61b411c0ca848f3d2b1cc67406d74c86069acf62d25d2e"},
+    {file = "flywheel_fncollector-0.3.2-py3-none-any.whl", hash = "sha256:394b2835626e043d0eb756463a3cd46fa094d28f9d43c65926a3183841065854"},
+    {file = "flywheel_fncollector-0.3.2.tar.gz", hash = "sha256:54497c117aac61716bbe3cafa7c31b94e033c8b23e44a141a0d273b87404263e"},
 ]
 
 [[package]]

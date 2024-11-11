@@ -1,10 +1,10 @@
-import inspect
 from collections.abc import Callable
+from functools import wraps
 from typing import Concatenate, TypeVar, TYPE_CHECKING
 
 from avilla.core.ryanvk.collector.account import AccountBasedPerformTemplate, AccountCollector
 from flywheel.typing import P, R
-# from flywheel_extras.utils import get_method_class  # TODO
+from flywheel_extras.utils import get_method_class
 from graia.ryanvk import Fn
 
 from .base import LagrangePerform
@@ -18,22 +18,24 @@ T_Perform = TypeVar('T_Perform', bound=LagrangePerform)
 m = AccountCollector['LagrangeProtocol', 'LagrangeAccount']()
 m.namespace = 'avilla.protocol/lagrange::compat'
 
-
-def _get_method_class(method: Callable) -> type | None:
-    if not (module := inspect.getmodule(method)):
-        return
-    for _, cls in inspect.getmembers(module, lambda _: inspect.isclass(_) and inspect.getmodule(_) is module):
-        if hasattr(cls, method.__name__):
-            return cls
+_TEMP_ENTITIES: dict[Callable, Callable] = {}
+_TEMP_PERFORMS: dict[Callable, type[LagrangePerform]] = {}
 
 
 def compat_collect(fn: Fn, **overload_settings):
     def wrapper(func: Callable[Concatenate[T_Perform, P], R]) -> Callable[Concatenate[T_Perform, P], R]:
-        def real_entity(self: AccountBasedPerformTemplate, *args: P.args, **kwargs: P.kwargs) -> R:
-            cls = _ if (_ := _get_method_class(func)) and issubclass(_, LagrangePerform) else LagrangePerform
-            return func(cls(self.protocol, self.account), *args, **kwargs)  # type: ignore
+        if not (entity := _TEMP_ENTITIES.get(func, None)):  # type: ignore
+            @wraps(func)
+            def entity(self: AccountBasedPerformTemplate, *args: P.args, **kwargs: P.kwargs) -> R:
+                if not (perform := _TEMP_PERFORMS.get(func, None)):
+                    _TEMP_PERFORMS[func] = perform = (
+                        _ if (_ := get_method_class(func)) and issubclass(_, LagrangePerform)
+                        else LagrangePerform
+                    )
+                return func(perform(self.protocol, self.account), *args, **kwargs)  # type: ignore
 
-        fn.collect(m, **overload_settings)(real_entity)
+            _TEMP_ENTITIES[func] = entity
+        fn.collect(m, **overload_settings)(entity)
         return func
 
     return wrapper
