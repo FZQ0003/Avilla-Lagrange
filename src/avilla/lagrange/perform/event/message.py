@@ -10,8 +10,8 @@ from loguru import logger
 from ..base import LagrangePerform
 from ...capability import LagrangeCapability
 from ...const import LAND_SELECTOR
+from ...database import MessageRecord
 from ...typing import RawMessage
-from ...utils.record import MessageRecord
 
 
 class LagrangeEventMessagePerform(LagrangePerform):
@@ -39,14 +39,14 @@ class LagrangeEventMessagePerform(LagrangePerform):
 
     @LagrangeCapability.event_callback.collect(raw_event=GroupMessage)
     async def group_message(self, raw_event: GroupMessage):
-        self.database.insert_user(raw_event.uin, raw_event.uid)
-        self.database.insert_msg_record(MessageRecord(
+        await self.database.insert_user(raw_event.uin, raw_event.uid)
+        await self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.uin,
             seq=raw_event.seq,
             msg_chain=raw_event.msg_chain,  # type: ignore
             group_uin=raw_event.grp_id,
             msg_id=raw_event.rand,
-            time=raw_event.time
+            time=datetime.fromtimestamp(raw_event.time)
         ))
         context = self.account.get_context(
             LAND_SELECTOR.group(str(raw_event.grp_id)).member(str(raw_event.uin))
@@ -58,20 +58,20 @@ class LagrangeEventMessagePerform(LagrangePerform):
 
     @LagrangeCapability.event_callback.collect(raw_event=FriendMessage)
     async def friend_message(self, raw_event: FriendMessage):
-        self.database.insert_user(raw_event.from_uin, raw_event.from_uid)
-        self.database.insert_msg_record(MessageRecord(
+        await self.database.insert_user(raw_event.from_uin, raw_event.from_uid)
+        await self.database.insert_msg_record(MessageRecord(
             friend_uin=raw_event.from_uin,
             seq=raw_event.seq,
             msg_chain=raw_event.msg_chain,
             target_uin=raw_event.to_uin,
             msg_id=raw_event.msg_id,
-            time=raw_event.timestamp
+            time=datetime.fromtimestamp(raw_event.timestamp)
         ))
         if raw_event.to_uin == self.client.uin:
             context = self.account.get_context(LAND_SELECTOR.friend(str(raw_event.from_uin)))
         else:
             logger.warning(f'Message target is not self: {raw_event}')
-            self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
+            await self.database.insert_user(raw_event.to_uin, raw_event.to_uid)
             context = self.account.get_context(
                 LAND_SELECTOR.friend(str(raw_event.to_uin)),
                 via=LAND_SELECTOR.friend(str(raw_event.from_uin))
@@ -87,7 +87,7 @@ class LagrangeEventMessagePerform(LagrangePerform):
         group = LAND_SELECTOR.group(str(raw_event.grp_id))
         context = self.account.get_context(
             group.message(str(raw_event.seq)),
-            via=group.member(str(self.database.get_user(raw_event.uid)[0]))
+            via=group.member(str((await self.database.get_user(raw_event.uid)).uin))
         )
         return MessageRevoked(
             context=context,

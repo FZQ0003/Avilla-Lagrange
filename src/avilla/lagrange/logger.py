@@ -6,7 +6,7 @@ from lagrange.utils.log import log, _Logger  # noqa
 from loguru import logger
 
 
-class LagrangeLoguruHandler(logging.Handler):
+class LoguruHandler(logging.Handler):
     def emit(self, record: logging.LogRecord):
         try:
             level = logger.level(record.levelname).name
@@ -21,13 +21,13 @@ class LagrangeLoguruHandler(logging.Handler):
 
 def _config(level: str | int):
     logging.basicConfig(
-        handlers=[LagrangeLoguruHandler()],
+        handlers=[LoguruHandler()],
         level=level
     )
     logger.configure(extra={'lagrange_log_level': level})
 
 
 log.set_level = _config
-log.set_level(logging.INFO)
+# log.set_level(logging.INFO)
 
 _Logger.get_logger = lambda self: logger.patch(lambda r: r.update(name=self.context))  # type: ignore

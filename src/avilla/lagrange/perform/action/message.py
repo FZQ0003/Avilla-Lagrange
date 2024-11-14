@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from avilla.core import Context, Message, Selector
 from avilla.core.elements import Reference
 from avilla.standard.core.message import MessageRevoke, MessageSend, MessageSent
@@ -9,7 +7,7 @@ from graia.amnesia.message import MessageChain
 from ..base import LagrangePerform
 from ..compat import compat_collect
 from ...capability import LagrangeCapability
-from ...utils.record import MessageRecord
+from ...database import MessageRecord
 
 
 class LagrangeMessageActionPerform(LagrangePerform):
@@ -48,7 +46,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
         raw, reply = await self.message_handle(context, message, reply)
         seq = await self.client.send_friend_msg(
             raw,  # type: ignore
-            self.database.get_user(int(target['friend']))[1]
+            (await self.database.get_user(int(target['friend']))).uid
         )
         # Manually insert into database & post event (lagrange-python will not record this)
         record = MessageRecord(
@@ -58,7 +56,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
             target_uin=int(target['friend']),
             msg_id=0  # TODO: msg_id
         )
-        self.database.insert_msg_record(record)
+        await self.database.insert_msg_record(record)
         self.protocol.post_event(
             MessageSent(
                 context,
@@ -67,7 +65,7 @@ class LagrangeMessageActionPerform(LagrangePerform):
                     scene=target,
                     sender=context.client,
                     content=message,
-                    time=datetime.fromtimestamp(record.time),
+                    time=record.time,
                     reply=reply
                 ),
                 self.account

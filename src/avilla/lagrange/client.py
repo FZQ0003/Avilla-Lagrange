@@ -81,14 +81,14 @@ class LagrangeClientService(Service):
                     rsp_m = await self.client.get_grp_members(group.grp_id, next_key)
                     for member in rsp_m.body:
                         if uin := member.account.uin:  # uin is optional
-                            db.insert_user(uin, member.account.uid)
+                            await db.insert_user(uin, member.account.uid)
                     next_key = rsp_m.next_key.decode() if rsp_m.next_key else None
                     has_next = next_key is not None
         if from_friends:
             rsp_f = await self.client.get_friend_list()
             for friend in rsp_f:
                 if uid := friend.uid:  # uid is optional (...)
-                    db.insert_user(friend.uin, uid)
+                    await db.insert_user(friend.uin, uid)
 
     async def launch(self, manager: Launart):
         async with self.stage('preparing'):

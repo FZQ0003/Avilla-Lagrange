@@ -7,15 +7,15 @@ from typing_extensions import Self
 
 if TYPE_CHECKING:
     from ..account import LagrangeAccount
+    from ..database import LagrangeDatabaseService
     from ..client import LagrangeClientService
     from ..protocol import LagrangeProtocol
-    from ..service import LagrangeDatabase
 
 
 class LagrangePerform(FnCollection):
     avilla: Avilla
     protocol: 'LagrangeProtocol'
-    database: 'LagrangeDatabase'
+    database: 'LagrangeDatabaseService'
     service: 'LagrangeClientService'
     account: 'LagrangeAccount'
     client: Client

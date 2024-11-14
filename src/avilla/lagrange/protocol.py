@@ -7,6 +7,7 @@ from avilla.core import Avilla
 from avilla.core.protocol import ProtocolConfig, BaseProtocol
 from graia.ryanvk import merge, ref
 from lagrange.info import DeviceInfo, SigInfo
+from sqlalchemy import URL, make_url
 
 from .client import LagrangeClientService
 from .const import SIGN_SEQ, SIGN_URL
@@ -15,9 +16,13 @@ from .service import LagrangeService
 from .utils.broadcast import AvillaLagrangeStopDispatcher
 
 
-@dataclass
 class LagrangeGlobalConfig(ProtocolConfig):
-    database_path: os.PathLike[str] | str = ':memory:'
+    database_url: URL
+
+    def __init__(self, database_url: os.PathLike[str] | str | URL = ':memory:'):
+        if not isinstance(database_url, URL) and '://' not in (database_url := str(database_url)):
+            database_url = f'sqlite:///{database_url}'
+        self.database_url = make_url(database_url)
 
 
 @dataclass

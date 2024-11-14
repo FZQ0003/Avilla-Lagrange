@@ -83,7 +83,8 @@ class LagrangeMessageSerializePerform(LagrangePerform):
     @LagrangeCapability.serialize_element.collect(element=Notice)
     async def notice(self, element: Notice) -> LgrAt:
         uin = int(element.target['member'])
-        return LgrAt(uin=uin, uid=self.database.get_user(uin)[1], text=f"{element.display or ''}")
+        uid = (await self.database.get_user(uin)).uid
+        return LgrAt(uin=uin, uid=uid, text=f"{element.display or ''}")
 
     @LagrangeCapability.serialize_element.collect(element=NoticeAll)
     async def notice_all(self, element: NoticeAll) -> LgrAtAll:
@@ -96,7 +97,7 @@ class LagrangeMessageSerializePerform(LagrangePerform):
             friend_uin = int(element.message.pattern.get('member', 0))
         else:
             friend_uin = int(element.message.pattern.get('friend', 0))
-        record = self.database.get_msg_record(
+        record = await self.database.get_msg_record(
             msg_id=int(element.message['message']),
             seq=int(element.message['message']),
             friend_uin=friend_uin,
@@ -105,8 +106,8 @@ class LagrangeMessageSerializePerform(LagrangePerform):
         return LgrQuote(
             seq=record.seq,
             uin=record.friend_uin,
-            timestamp=record.time,
-            uid=self.database.get_user(record.friend_uin)[1],
+            timestamp=int(record.time.timestamp()),
+            uid=record.friend.uid,
             msg=record.msg
         )
 

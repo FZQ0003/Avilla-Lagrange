@@ -15,7 +15,10 @@ class LagrangeMetadataPerform(LagrangePerform):
     async def get_group_message(self, message: Selector, route: ...) -> Message:
         try:
             # Search from database
-            record = self.database.get_msg_record(seq=int(message['message']), group_uin=int(message['group']))
+            record = await self.database.get_msg_record(
+                seq=int(message['message']),
+                group_uin=int(message['group'])
+            )
             return await LagrangeEventMessagePerform.from_self(self).message_handle(
                 self.account.get_context(message.into('::group').member(str(record.friend_uin))),
                 cast(RawMessage, record)

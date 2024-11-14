@@ -7,8 +7,9 @@ authors = [
 ]
 dependencies = [
     "avilla-core>=1.0.0a27",
-    "lagrange-python>=0.1.5",
     "avilla-standard-qq>=1.0.0a22",
+    "graia-amnesia[sqla]>=0.9.0",
+    "lagrange-python>=0.1.5",
     "flywheel-fncollector>=0.3.2",
 ]
 requires-python = ">=3.10"

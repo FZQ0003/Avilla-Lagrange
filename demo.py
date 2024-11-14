@@ -18,7 +18,7 @@ config = LagrangeConfig(
     int(os.getenv('LAGRANGE_UIN', '0')),
     sign_url=os.getenv('LAGRANGE_SIGN_URL', SIGN_URL)
 )
-global_config = LagrangeGlobalConfig('demo-database.db')
+global_config = LagrangeGlobalConfig('sqlite+aiosqlite:///demo-database.db')
 avilla.apply_protocols(LagrangeProtocol(global_config).configure(config))
 
 
