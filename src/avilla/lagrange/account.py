@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from avilla.core import BaseAccount
 from avilla.core.account import AccountStatus
@@ -17,7 +17,7 @@ class LagrangeAccount(BaseAccount):
 
     @cached_property
     def protocol(self) -> 'LagrangeProtocol':
-        return self.info.protocol  # type: ignore
+        return cast('LagrangeProtocol', self.info.protocol)
 
     @cached_property
     def service(self) -> 'LagrangeClientService':

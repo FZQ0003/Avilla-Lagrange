@@ -40,7 +40,6 @@ from lagrange.client.message.elems import (
     # File as LgrFile,
 )
 
-from .elements import MarketFaceEx
 from ..base import LagrangePerform
 from ...capability import LagrangeCapability
 from ...const import TEXT_AT_ALL
@@ -138,15 +137,11 @@ class LagrangeMessageSerializePerform(LagrangePerform):
     # TODO: share
 
     @LagrangeCapability.serialize_element.collect(element=MarketFace)
-    @LagrangeCapability.serialize_element.collect(element=MarketFaceEx)
     async def market_face(self, element: MarketFace) -> LgrMarketFace:
-        tab_id = getattr(element, 'tab_id', MarketFaceEx.tab_id)
-        width = getattr(element, 'width', MarketFaceEx.width)
-        height = getattr(element, 'height', MarketFaceEx.height)
         return LgrMarketFace(
-            name=element.name or '[]',
+            name=element.summary or '[]',
             face_id=bytes.fromhex(element.id),
-            tab_id=tab_id,
-            width=width,
-            height=height
+            tab_id=int(element.tab_id or 0),
+            width=200,
+            height=200
         )

@@ -1,11 +1,14 @@
 import base64
 import builtins
 import json
+from collections.abc import Generator
 
 from dataclasses import fields, is_dataclass
 from importlib import import_module
 from types import ModuleType
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar('T')
 
 
 def object_to_type_str(obj: Any) -> str:
@@ -64,7 +67,7 @@ def object_to_dict(obj: Any) -> dict[str, Any]:
     return {}
 
 
-def dict_to_object(cls, obj: dict[str, Any]) -> Any:
+def dict_to_object(cls: type[T], obj: dict[str, Any]) -> T:
     return cls(**obj)
 
 
@@ -91,15 +94,15 @@ def json_decoder(obj: dict[str, Any]) -> Any:
     return obj
 
 
-def json_encode_object(obj) -> str:
+def json_encode_object(obj: Any) -> str:
     return 'json:' + json.dumps(obj, separators=(',', ':'), default=json_encoder)
 
 
-def json_decode_object(s: str):
+def json_decode_object(s: str) -> Any:
     return json.loads(s[5:] if s.startswith('json:') else s, object_hook=json_decoder)
 
 
-def get_subclasses(cls, contain_self: bool = True):
+def get_subclasses(cls: type[T], contain_self: bool = True) -> Generator[type[T]]:
     if contain_self:
         yield cls
     for sub_cls in cls.__subclasses__():

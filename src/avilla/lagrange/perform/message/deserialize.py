@@ -19,6 +19,7 @@ from avilla.standard.qq.elements import (
     Poke,
     # Share,
     Xml,
+    MarketFace,
 )
 from lagrange.client.message.elems import (
     Text as LgrText,
@@ -38,7 +39,6 @@ from lagrange.client.message.elems import (
     # File as LgrFile,
 )
 
-from .elements import MarketFaceEx
 from ..base import LagrangePerform
 from ...capability import LagrangeCapability
 from ...resource import LagrangeResource
@@ -110,11 +110,11 @@ class LagrangeMessageDeserializePerform(LagrangePerform):
     # TODO: forward, file, GreyTips
 
     @LagrangeCapability.deserialize_element.collect(raw_element=LgrMarketFace)
-    async def market_face(self, raw_element: LgrMarketFace) -> MarketFaceEx:
-        return MarketFaceEx(
+    async def market_face(self, raw_element: LgrMarketFace) -> MarketFace:
+        return MarketFace(
             id=raw_element.face_id.hex(),
-            tab_id=raw_element.tab_id,
-            width=raw_element.width,
-            height=raw_element.height,
-            name=raw_element.text
+            tab_id=str(raw_element.tab_id),
+            # width=raw_element.width,
+            # height=raw_element.height,
+            summary=raw_element.text
         )
